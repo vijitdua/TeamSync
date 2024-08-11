@@ -1,5 +1,6 @@
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
+import {authUserModel} from '../models/authUserModel.js';
 import { verifyLoginCredentials, registerNewUser } from '../services/authService.js';
 
 /**
@@ -52,7 +53,7 @@ passport.serializeUser((user, done) => {
  */
 passport.deserializeUser(async (userId, done) => {
     try {
-        const userRecord = await User.findByPk(userId);
+        const userRecord = await authUserModel.findByPk(userId);
         done(null, userRecord);
     } catch (err) {
         done(err);

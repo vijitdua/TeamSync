@@ -1,7 +1,7 @@
 import {sequelize} from "../config/database.js";
 import {DataTypes} from "sequelize";
 
-const organizationTeamModel = sequelize.define("organizationTeamModel", {
+export const organizationTeamModel = sequelize.define("organizationTeamModel", {
     /*
         Automatically filled data fields
      */
@@ -79,5 +79,3 @@ const organizationTeamModel = sequelize.define("organizationTeamModel", {
 
 // Create table if not exists
 organizationTeamModel.sync();
-
-export default organizationTeamModel;

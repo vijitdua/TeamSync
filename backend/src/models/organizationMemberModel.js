@@ -1,7 +1,7 @@
 import {sequelize} from "../config/database.js";
 import {DataTypes} from "sequelize";
 
-const organizationMemberModel = sequelize.define('organizationMemberModel', {
+export const organizationMemberModel = sequelize.define('organizationMemberModel', {
     /*
         Automatically filled data fields
      */
@@ -107,5 +107,3 @@ const organizationMemberModel = sequelize.define('organizationMemberModel', {
 
 // Create table if it doesn't exist
 organizationMemberModel.sync();
-
-export default organizationMemberModel;

@@ -2,7 +2,7 @@ import {DataTypes} from 'sequelize';
 import {sequelize} from '../config/database.js';
 
 
-const authUserModel = sequelize.define('authUserModel', {
+export const authUserModel = sequelize.define('authUserModel', {
     /*
         Automatically filled data fields
      */
@@ -31,4 +31,3 @@ const authUserModel = sequelize.define('authUserModel', {
 // Create table if not exists
 authUserModel.sync();
 
-export default authUserModel;

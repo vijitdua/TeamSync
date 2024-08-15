@@ -11,6 +11,7 @@ import { authUserModel } from '../models/authUserModel.js';
 export async function verifyLoginCredentials(username, plainTextPassword) {
     try {
         const userRecord = await authUserModel.findOne({ where: { username } });
+        console.log(userRecord);
         if (!userRecord) {
             return { success: false, message: 'Incorrect username or password.' };
         }

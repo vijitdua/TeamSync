@@ -35,12 +35,6 @@ const organizationMemberModel = sequelize.define('organizationMemberModel', {
         allowNull: false,
     },
 
-    databaseAddDate: {
-        type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW, // Automatically set to the current date and time when the record is created
-        allowNull: false,
-    },
-
     /*
         Optional Fields
      */

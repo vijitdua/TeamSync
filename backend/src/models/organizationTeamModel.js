@@ -26,6 +26,13 @@ const organizationTeamModel = sequelize.define("organizationTeamModel", {
         allowNull: false,
     },
 
+    // Date when team was created, defaults to current date if not provided
+    foundationDate: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW, // Sets the default value to the current date if not provided
+        allowNull: false,
+    },
+
     /*
         Optional Fields
      */
@@ -60,6 +67,13 @@ const organizationTeamModel = sequelize.define("organizationTeamModel", {
         type: DataTypes.JSON, // Stores a JSON object
         allowNull: true,      // Optional field
     },
+
+    // Date when team was deleted / archived
+    deletionDate: {
+        type: DataTypes.DATE,
+        allowNull: true,
+    },
+
 });
 
 

@@ -5,7 +5,9 @@ import authRoutes from "./routes/authRoutes.js";
 import {env} from "./config/env.js";
 import session from "express-session";
 import flash from "connect-flash";
-import passport from "passport"; // Import connect-flash for flash messages
+import passport from "passport";
+import teamDataRoutes from "./routes/teamDataRoutes.js";
+import memberDataRoutes from "./routes/memberDataRoutes.js"; // Import connect-flash for flash messages
 
 const app = express();
 
@@ -31,6 +33,8 @@ app.use(passport.session()); // Persistent login sessions
 app.use(flash()); // Add connect-flash middleware
 
 app.use("/api/auth", authRoutes);
+app.use("/api/team", teamDataRoutes);
+app.use("/api/member", memberDataRoutes);
 
 // Server config
 const server = http.createServer(app);

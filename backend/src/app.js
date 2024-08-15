@@ -10,7 +10,8 @@ import passport from "passport"; // Import connect-flash for flash messages
 const app = express();
 
 const corsOptions={
-    origin: env.corsOrigin,
+    // Disable COR origin during testing
+    // origin: env.corsOrigin,
     optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 };
 

@@ -1,12 +1,7 @@
-import dotenv from "dotenv";
-dotenv.config();
-
-console.log("Database Name:", process.env.DATABASE);
-
 import readline from 'readline';
 import bcrypt from 'bcryptjs';
-import { authUserModel } from './src/models/authUserModel.js'; // Ensure this points to your model
-import { sequelize } from './src/config/database.js';  // Import your existing database configuration
+import { authUserModel } from './src/models/authUserModel.js';
+import { sequelize } from './src/config/database.js';
 
 const rl = readline.createInterface({
     input: process.stdin,

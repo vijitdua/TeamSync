@@ -11,4 +11,5 @@ export const env = {
     databaseUser: process.env.DATABASE_USER,
     databasePassword: process.env.DATABASE_PASSWORD,
     passportSecret: process.env.PASSPORT_SECRET,
+    serverLocation: process.env.SERVER_LOCATION,
 }

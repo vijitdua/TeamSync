@@ -1,12 +1,20 @@
 import {DataTypes} from 'sequelize';
 import {sequelize} from '../config/database.js';
 
-export const authUserModel = sequelize.define('authUserModel', {
+
+const authUserModel = sequelize.define('authUserModel', {
+    /*
+        Automatically filled data fields
+     */
     id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
-        autoIncrement: true,
     },
+
+    /*
+        Required fields, where some must be automatically generated and others can be manually provided or automatically filled if not specified.
+     */
     username: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -17,9 +25,10 @@ export const authUserModel = sequelize.define('authUserModel', {
         allowNull: false,
     },
 }, {
-    tableName: 'authUsers', // Explicitly define the table name here
+    tableName: 'authUsers',
 });
 
 // Create table if not exists
 authUserModel.sync();
 
+export default authUserModel;

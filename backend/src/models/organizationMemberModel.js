@@ -93,13 +93,13 @@ const organizationMemberModel = sequelize.define('organizationMemberModel', {
         allowNull: true,      // Optional field
     },
 
-    // Any other data that the users of the app might want to add themselves. Public portion
+    // Any other data that the organization using this app might want to add themselves. Public portion
     customDataPublic: {
         type: DataTypes.JSON, // Stores a JSON object
         allowNull: true,      // Optional field
     },
 
-    // Any other data that the users of the app might want to add themselves. Private portion
+    // Any other data that the organization using this app might want to add themselves. Private portion
     customDataPrivate: {
         type: DataTypes.JSON, // Stores a JSON object
         allowNull: true,      // Optional field

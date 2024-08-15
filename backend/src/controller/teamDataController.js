@@ -1,4 +1,4 @@
-export function getAllTeams(req, res) {
+export function getAllTeamsController(req, res) {
     try{
 
     }catch(err){

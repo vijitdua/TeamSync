@@ -1,13 +1,19 @@
-import { organizationMemberModel } from "../models/organizationMemberModel.js";
+import { 
+    getAllMembers, 
+    getMember, 
+    addMember, 
+    updateMember, 
+    deleteMember 
+} from "../services/memberDataService.js";
 
 /**
  * Controller that gets all members
- * When successful, sends status 200 with data of all members
+ * When successful, sends status 200 and JSON with success and list of all member IDs
  * When unsuccessful, sends 400 status with false success and an error message
  */
 export async function getAllMembersController(req, res) {
     try{
-        const members = await organizationMemberModel.findAll();  // Fetch all members from organizationMemberModel
+        const members = await getAllMembers();  // Fetch all members from organizationMemberModel
 
         res.status(200).json({
             success: true,
@@ -24,12 +30,12 @@ export async function getAllMembersController(req, res) {
 
 /**
  * Controller that gets all members
- * When successful, sends status 200 with data of all members
+ * When successful, sends status 200 with data of created member
  * When unsuccessful, sends 400 status with false success and an error message
  */
 export async function createMemberController(req, res){
     try{
-        const newMember = await organizationMemberModel.create(req.body);  // Use the request body data to create a new member
+        const newMember = addMember(req.body);  // Use the request body data to create a new member
 
         res.status(200).json({
             success: true, 
@@ -51,7 +57,7 @@ export async function createMemberController(req, res){
 export async function getMemberController(req, res){
     try{
         const id = req.params.id;  // Get member ID from request parameters
-        const member = await organizationMemberModel.findByPk(id);  // Member ID is the primary key used to find a member
+        const member = getMember(id);  // Member ID is the primary key used to find a member
 
         if (!member) {
             throw Error("Member not found");
@@ -77,14 +83,7 @@ export async function getMemberController(req, res){
 export async function updateMemberController(req, res){
     try{
         const id = req.params.id;  // Get member ID from request parameters
-        const member = await organizationMemberModel.findByPk(id);  // Member ID is the primary key used to find a member
-
-        if (!member) {
-            throw Error("Can't update because member not found");
-        }
-
-        member.set(req.body);  // Use the data in the request body to update the member
-        await member.save();  // Persist changes in the database
+        updateMember(id, req.body);
 
         res.status(200).json({
             success: true, 
@@ -106,8 +105,7 @@ export async function updateMemberController(req, res){
 export async function deleteMemberController(req, res){
     try{
         const id = req.params.id;  // Get member ID from request parameters
-        const member = await organizationMemberModel.findByPk(id);  // Member ID is the primary key used to find a member
-        await organizationMemberModel.destroy(member);  // Delete the member
+        const deleted = await deleteMember(id);  // Delete the member
         
         res.status(200).json({
             success: true, 

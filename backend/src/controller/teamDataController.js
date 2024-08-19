@@ -57,7 +57,7 @@ export async function createTeamController(req, res) {
 export async function getTeamController(req, res) {
     try {
         const id = req.params.id;  // Get team ID from request parameters
-        const team = getTeam(id);
+        const team = await getTeam(id);
 
         if (!team) {
             throw Error("Team not found");
@@ -83,7 +83,7 @@ export async function getTeamController(req, res) {
 export async function updateTeamController(req, res) {
     try {
         const id = req.params.id;  // Get team ID from request parameters
-        const team = updateTeam(id, req.body);
+        const team = await updateTeam(id, req.body);
 
         res.status(200).json({
             success: true, 

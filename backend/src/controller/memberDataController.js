@@ -35,7 +35,7 @@ export async function getAllMembersController(req, res) {
  */
 export async function createMemberController(req, res) {
     try {
-        const newMember = addMember(req.body);  // Use the request body data to create a new member
+        const newMember = await addMember(req.body);  // Use the request body data to create a new member
 
         res.status(200).json({
             success: true, 
@@ -83,7 +83,7 @@ export async function getMemberController(req, res) {
 export async function updateMemberController(req, res) {
     try {
         const id = req.params.id;  // Get member ID from request parameters
-        updateMember(id, req.body);
+        const member = await updateMember(id, req.body);
 
         res.status(200).json({
             success: true, 

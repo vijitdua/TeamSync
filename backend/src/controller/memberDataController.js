@@ -12,7 +12,7 @@ import {
  * When unsuccessful, sends 400 status with false success and an error message
  */
 export async function getAllMembersController(req, res) {
-    try{
+    try {
         const members = await getAllMembers();  // Fetch all members from organizationMemberModel
 
         res.status(200).json({
@@ -20,7 +20,7 @@ export async function getAllMembersController(req, res) {
             data: members,
         });
         
-    }catch(err){
+    } catch (err) {
         res.status(400).json({
             success: false, 
             error: err.message, 
@@ -29,19 +29,19 @@ export async function getAllMembersController(req, res) {
 }
 
 /**
- * Controller that gets all members
+ * Controller that creates a new member
  * When successful, sends status 200 with data of created member
  * When unsuccessful, sends 400 status with false success and an error message
  */
-export async function createMemberController(req, res){
-    try{
+export async function createMemberController(req, res) {
+    try {
         const newMember = addMember(req.body);  // Use the request body data to create a new member
 
         res.status(200).json({
             success: true, 
             data: newMember,
         })
-    }catch(err){
+    } catch (err) {
         res.status(400).json({
             success: false, 
             message: err.message, 
@@ -54,8 +54,8 @@ export async function createMemberController(req, res){
  * When successful, sends status 200 with data of the selected member
  * When unsuccessful, sends 400 status with false success and an error message
  */
-export async function getMemberController(req, res){
-    try{
+export async function getMemberController(req, res) {
+    try {
         const id = req.params.id;  // Get member ID from request parameters
         const member = getMember(id);  // Member ID is the primary key used to find a member
 
@@ -67,7 +67,7 @@ export async function getMemberController(req, res){
             success: true, 
             data: member,
         })
-    }catch(err){
+    } catch (err) {
         res.status(400).json({
             success: false, 
             message: err.message, 
@@ -80,8 +80,8 @@ export async function getMemberController(req, res){
  * When successful, sends status 200 with data of the selected member
  * When unsuccessful, sends 400 status with false success and an error message
  */
-export async function updateMemberController(req, res){
-    try{
+export async function updateMemberController(req, res) {
+    try {
         const id = req.params.id;  // Get member ID from request parameters
         updateMember(id, req.body);
 
@@ -89,7 +89,7 @@ export async function updateMemberController(req, res){
             success: true, 
             data: member,
         })
-    }catch(err){
+    } catch (err) {
         res.status(400).json({
             success: false, 
             message: err.message, 
@@ -98,20 +98,20 @@ export async function updateMemberController(req, res){
 }
 
 /**
- * Controller that deletes a specific member
+ * Controller that "deletes" (fake-deletes) a specific member
  * When successful, sends status 200 with data of the selected member
  * When unsuccessful, sends 400 status with false success and an error message
  */
 export async function deleteMemberController(req, res){
-    try{
+    try {
         const id = req.params.id;  // Get member ID from request parameters
-        const deleted = await deleteMember(id);  // Delete the member
+        const deleted = await deleteMember(id);  // "Delete" the member
         
         res.status(200).json({
             success: true, 
             data: deleted,
         })
-    }catch(err){
+    } catch (err) {
         res.status(400).json({
             success: false, 
             message: err.message, 

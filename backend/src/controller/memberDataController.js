@@ -1,9 +1,9 @@
-import { 
-    getAllMembers, 
-    getMember, 
-    addMember, 
-    updateMember, 
-    deleteMember 
+import {
+    getAllMembers,
+    getMember,
+    addMember,
+    updateMember,
+    deleteMember, uploadMemberImage, getMemberImage
 } from "../services/memberDataService.js";
 
 /**
@@ -19,11 +19,11 @@ export async function getAllMembersController(req, res) {
             success: true,
             data: members,
         });
-        
+
     } catch (err) {
         res.status(400).json({
-            success: false, 
-            error: err.message, 
+            success: false,
+            error: err.message,
         })
     }
 }
@@ -38,13 +38,13 @@ export async function createMemberController(req, res) {
         const newMember = await addMember(req.body);  // Use the request body data to create a new member
 
         res.status(200).json({
-            success: true, 
+            success: true,
             data: newMember,
         })
     } catch (err) {
         res.status(400).json({
-            success: false, 
-            message: err.message, 
+            success: false,
+            message: err.message,
         });
     }
 }
@@ -64,13 +64,13 @@ export async function getMemberController(req, res) {
         }
 
         res.status(200).json({
-            success: true, 
+            success: true,
             data: member,
         })
     } catch (err) {
         res.status(400).json({
-            success: false, 
-            message: err.message, 
+            success: false,
+            message: err.message,
         });
     }
 }
@@ -86,13 +86,13 @@ export async function updateMemberController(req, res) {
         const member = await updateMember(id, req.body);
 
         res.status(200).json({
-            success: true, 
+            success: true,
             data: member,
         })
     } catch (err) {
         res.status(400).json({
-            success: false, 
-            message: err.message, 
+            success: false,
+            message: err.message,
         });
     }
 }
@@ -102,19 +102,53 @@ export async function updateMemberController(req, res) {
  * When successful, sends status 200 with data of the selected member
  * When unsuccessful, sends 400 status with false success and an error message
  */
-export async function deleteMemberController(req, res){
+export async function deleteMemberController(req, res) {
     try {
         const id = req.params.id;  // Get member ID from request parameters
         const deleted = await deleteMember(id);  // "Delete" the member
-        
+
         res.status(200).json({
-            success: true, 
+            success: true,
             data: deleted,
         })
     } catch (err) {
         res.status(400).json({
-            success: false, 
-            message: err.message, 
+            success: false,
+            message: err.message,
         });
+    }
+}
+
+export async function uploadMemberImageController(req, res) {
+    try {
+        uploadMemberImage.single('memberImage');
+        if(!req.file){throw new Error('No file uploaded');}
+        res.status(200).json({
+            success: true,
+            file: `/memberImage/${req.file.filename}`,
+        });
+    } catch (err) {
+        res.status(400).json({
+            success: false,
+            message: err.message
+        });
+    }
+}
+
+export async function getMemberImageController(req, res) {
+    try{
+        res.sendFile(getMemberImage(req.params.filename), function (err){
+            if(err){
+                res.status(400).json({
+                    success: false,
+                    message: err.message,
+                })
+            }
+        });
+    }catch(err){
+        res.status(400).json({
+            success: false,
+            message: err.message,
+        })
     }
 }

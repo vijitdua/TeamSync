@@ -9,6 +9,9 @@ import passport from "passport";
 import teamDataRoutes from "./routes/teamDataRoutes.js";
 import memberDataRoutes from "./routes/memberDataRoutes.js"; // Import connect-flash for flash messages
 
+// Helper function to get the directory of the current file (ESM workaround)
+
+
 const app = express();
 
 const corsOptions={

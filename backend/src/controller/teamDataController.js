@@ -4,7 +4,7 @@ import {
     addTeam,
     updateTeam,
     deleteTeam
-} from "../services/teamDataService"
+} from "../services/teamDataService.js"
 
 /**
  * Controller that gets all teams

@@ -1,5 +1,5 @@
 import {Router} from "express";
-import {isAuthenticatedUser} from "../controller/authController.js";
+import {isAuthenticatedUserMiddleware} from "../controller/authController.js";
 import {
     createTeamController,
     getAllTeamsController,
@@ -10,10 +10,10 @@ import {
 
 const router = Router();
 
-router.post('/', isAuthenticatedUser, createTeamController);
-router.get('/', isAuthenticatedUser, getAllTeamsController);
-router.get('/:id', isAuthenticatedUser, getTeamController);
-router.delete('/:id', isAuthenticatedUser, deleteTeamController);
-router.put('/:id', isAuthenticatedUser, updateTeamController);
+router.post('/', isAuthenticatedUserMiddleware, createTeamController);
+router.get('/', isAuthenticatedUserMiddleware, getAllTeamsController);
+router.get('/:id', isAuthenticatedUserMiddleware, getTeamController);
+router.delete('/:id', isAuthenticatedUserMiddleware, deleteTeamController);
+router.put('/:id', isAuthenticatedUserMiddleware, updateTeamController);
 
 export default router;

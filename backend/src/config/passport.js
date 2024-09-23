@@ -29,7 +29,9 @@ passport.use('login', new LocalStrategy(
 passport.use('signup', new LocalStrategy(
     async function (username, password, done) {
         try {
-            const { success, user, message } = await registerNewUser(username, password);
+            // external API user registration is disabled, uncomment the following and comment the subsequent line to enable external registration
+            // const {success, user, message} = await registerNewUser(username, password);
+            const { success, user, message } = {success: false, message: 'User registration is disabled'};
             if (!success) {
                 return done(null, false, { message });
             }

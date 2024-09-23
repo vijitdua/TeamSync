@@ -5,7 +5,7 @@ import passport from '../config/passport.js';
  */
 export const loginController = (req, res, next) => {
     const successRedirect = req.query.successRedirect || '/';
-    const failureRedirect = req.query.failureRedirect || '/login';
+    const failureRedirect = req.query.failureRedirect || '/login-fail';
 
     passport.authenticate('login', {
         successRedirect,
@@ -19,7 +19,7 @@ export const loginController = (req, res, next) => {
  */
 export const signupController = (req, res, next) => {
     const successRedirect = req.query.successRedirect || '/';
-    const failureRedirect = req.query.failureRedirect || '/signup';
+    const failureRedirect = req.query.failureRedirect || '/signup-fail';
 
     passport.authenticate('signup', {
         successRedirect,
@@ -33,10 +33,10 @@ export function isAuthenticatedUserMiddleware(req, res, next) {
     if (req.isAuthenticated()) {
         return next();
     }
-    res.status(401).json({ message: 'Unauthorized' });
+    res.status(401).json({success: false, message: 'Unauthorized' });
 }
 
 // Function to check if user is authenticated
-export function isAuthenticatedUser(req, res, next) {
+export function isAuthenticatedUser(req) {
     return req.isAuthenticated();
 }

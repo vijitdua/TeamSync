@@ -28,7 +28,19 @@ export async function getAllTeams() {
  */
 export async function getTeam(id, isAuthenticated = false) {
     try {
-        const team = await organizationTeamModel.findByPk(id);
+        // Define the base query options
+        const queryOptions = {
+            where: { id: id },
+        };
+
+        // If not authenticated, only include teams that are active (deletionDate is null)
+        if (!isAuthenticated) {
+            queryOptions.where.deletionDate = null;
+        }
+
+        // Find the team based on query options
+        const team = await organizationTeamModel.findOne(queryOptions);
+
         if (!team) {
             throw new Error(`Team with ID ${id} not found`);
         }

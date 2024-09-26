@@ -29,8 +29,20 @@ export async function getAllMembers() {
  */
 export async function getMember(id, isAuthenticated = false) {
     try {
-        // Find the member by ID and return the result
-        const member = await organizationMemberModel.findByPk(id);
+
+        // Define the base query options
+        const queryOptions = {
+            where: { id: id },
+        };
+
+        // If not authenticated, only include members who haven't left (leaveDate is null)
+        if (!isAuthenticated) {
+            queryOptions.where.leaveDate = null;
+        }
+
+        // Find the member based on query options
+        const member = await organizationMemberModel.findOne(queryOptions);
+
         if (!member) {
             throw new Error(`Member with ID ${id} not found`);
         }

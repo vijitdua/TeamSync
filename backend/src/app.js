@@ -10,6 +10,7 @@ import teamDataRoutes from "./routes/teamDataRoutes.js";
 import memberDataRoutes from "./routes/memberDataRoutes.js";
 import RedisStore from "connect-redis";
 import redisClient from "./config/redis.js";
+import {conditionalJson} from "./middleware/conditionalJson.js";
 
 const app = express();
 
@@ -21,7 +22,7 @@ const corsOptions={
 };
 
 app.use(cors(corsOptions));
-app.use(express.json());
+app.use(conditionalJson); // express.json is used if expecting json, otherwise not.
 
 app.use(session({
     store: new RedisStore({ client: redisClient }),

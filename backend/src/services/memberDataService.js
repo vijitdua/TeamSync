@@ -3,6 +3,7 @@ import multer from "multer";
 import {v4 as uuidv4} from 'uuid';
 import {join} from "path";
 import {env} from "../config/env.js";
+import {memberImageStorage} from "../config/multerStorage.js";
 
 /**
  * Gets the userIDs of all members of the organization
@@ -143,25 +144,39 @@ export async function deleteMember(id) {
     }
 }
 
-// Setup storage for memberImage
-const memberImageStorage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'memberImage/'); // Upload to the 'memberImage' folder
-    },
-    filename: function (req, file, cb) {
-        cb(null, uuidv4() + file.originalname.slice(file.originalname.lastIndexOf('.'))); // Ensure unique filenames
-    },
-    limits: { fileSize: 10 * 1024 * 1024}, // 10mb upload limit
-});
-
 /**
  * Example usage:
  *
  * This endpoint handles the upload of member images. It expects a single file upload with the field name 'image'.
  *
+ * ### Posting Instructions:
+ *
+ * 1. HTTP method as `POST`.
+ * 2. Set the URL to the correct endpoint.
+ * 3. **Body** select `form-data`.
+ * 4. Add a new key with the name `image` (this is the field name that multer expects).
+ * 5. Set the type to **File**, and select the file you want to upload.
+ * ### Programmatically (using JavaScript and Fetch API):
+ *
  * ```js
- * // Example route for handling member image uploads
- * app.post('/upload/member', (req, res) => {
+ * const formData = new FormData();
+ * formData.append('image', fileInput.files[0]); // 'image' should match the field name
+ *
+ * fetch('http://localhost:3000/example', {
+ *   method: 'POST',
+ *   body: formData,
+ * })
+ * .then(response => response.json())
+ * .then(data => console.log(data))
+ * .catch(error => console.error('Error:', error));
+ * ```
+ *
+ * In this example, `fileInput` represents the file input field in a form.
+ *
+ * ### Example route for handling member image uploads:
+ *
+ * ```js
+ * router.post('/image', (req, res) => {
  *   uploadMemberImage(req, res, (err) => {
  *     if (err) {
  *       return res.status(500).send({ error: 'Failed to upload image' });
@@ -174,9 +189,11 @@ const memberImageStorage = multer.diskStorage({
  * });
  * ```
  *
- * `uploadMemberImage` handles the image upload process, storing the file and making it accessible via the returned URL.
+ * `uploadMemberImage` handles the image upload process, storing the file in the `memberImage/` directory and making it accessible via the returned URL.
+ * @throws Error if unsuccessful
  */
 export const uploadMemberImage = multer({ storage: memberImageStorage }).single('image');
+
 
 export function getMemberImage(filename){
     return join(join(env.rootLocation, 'memberImage'),`${filename}`);

@@ -13,13 +13,18 @@ import {
 
 const router = Router();
 
+// Fully public route
+router.get('/', getAllTeamsController);
+router.get('/image/:filename', getTeamImageController);
+
+// Semi-Public routes (data might differ based on auth state which is checked inside controllers)
+router.get('/:id', getTeamController);
+
+// Private routes
 router.post('/', isAuthenticatedUserMiddleware, createTeamController);
-router.get('/', isAuthenticatedUserMiddleware, getAllTeamsController);
-router.get('/:id', isAuthenticatedUserMiddleware, getTeamController);
 router.delete('/:id', isAuthenticatedUserMiddleware, deleteTeamController);
 router.put('/:id', isAuthenticatedUserMiddleware, updateTeamController);
 router.post('/image', isAuthenticatedUserMiddleware, uploadTeamImageController);
-router.get('/image/:filename', getTeamImageController);
 
 
 export default router;

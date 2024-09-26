@@ -7,6 +7,7 @@ import {
     uploadTeamImage,
     getTeamImage
 } from "../services/teamDataService.js";
+import {isAuthenticatedUser} from "./authController.js";
 
 /**
  * Controller that gets all teams
@@ -59,7 +60,9 @@ export async function createTeamController(req, res) {
 export async function getTeamController(req, res) {
     try {
         const id = req.params.id;  // Get team ID from request parameters
-        const team = await getTeam(id);
+        const isAuthenticated = isAuthenticatedUser(req); // Check if the user is authenticated
+        const team = await getTeam(id, isAuthenticated); // Retrieve team data, handling public/private data based on authentication
+
 
         if (!team) {
             throw Error("Team not found");

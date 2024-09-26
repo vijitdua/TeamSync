@@ -5,6 +5,7 @@ import {
     updateMember,
     deleteMember, uploadMemberImage, getMemberImage
 } from "../services/memberDataService.js";
+import {isAuthenticatedUser} from "./authController.js";
 
 /**
  * Controller that gets all members
@@ -57,7 +58,8 @@ export async function createMemberController(req, res) {
 export async function getMemberController(req, res) {
     try {
         const id = req.params.id;  // Get member ID from request parameters
-        const member = await getMember(id);  // Member ID is the primary key used to find a member
+        const isAuthenticated = await isAuthenticatedUser(req);
+        const member = await getMember(id, isAuthenticated);  // Member ID is the primary key used to find a member
 
         if (!member) {
             throw Error("Member not found");

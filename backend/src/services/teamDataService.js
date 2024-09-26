@@ -19,18 +19,26 @@ export async function getAllTeams() {
 }
 
 /**
- * Retrieve a team by its ID.
+ * Retrieve a team by its ID. Returns different data based on authentication state
  *
  * @param {string} id - The ID of the team to retrieve (Required).
+ * @param {boolean} isAuthenticated - Whether the user is authenticated
  * @returns {Promise<Object>} - A promise that resolves to the team data if found.
  * @throws {Error} - Throws an error if the team cannot be found.
  */
-export async function getTeam(id) {
+export async function getTeam(id, isAuthenticated = false) {
     try {
         const team = await organizationTeamModel.findByPk(id);
         if (!team) {
             throw new Error(`Team with ID ${id} not found`);
         }
+
+        if (!isAuthenticated) {
+            // Exclude private data from team object when user is not authenticated
+            const { customDataPrivate, ...publicData } = team.dataValues;
+            return publicData;
+        }
+
         return team;
     } catch (error) {
         throw new Error(`Error retrieving team:\n${error}`);

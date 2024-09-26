@@ -20,19 +20,27 @@ export async function getAllMembers() {
 }
 
 /**
- * Retrieve a member by their ID.
+ * Retrieve a member by their ID. Returns different data based on authentication state
  *
  * @param {string} id - The ID of the member to retrieve (Required).
+ * @param {boolean} isAuthenticated - Whether the user is authenticated
  * @returns {Promise<Object>} - A promise that resolves to the member data if found.
  * @throws {Error} - Throws an error if the member cannot be found.
  */
-export async function getMember(id) {
+export async function getMember(id, isAuthenticated = false) {
     try {
         // Find the member by ID and return the result
         const member = await organizationMemberModel.findByPk(id);
         if (!member) {
             throw new Error(`Member with ID ${id} not found`);
         }
+
+        if (!isAuthenticated) {
+            // Exclude private data from member object when user is not authenticated
+            const { customDataPrivate, ...publicData } = member.dataValues;
+            return publicData;
+        }
+
         return member;
     } catch (error) {
         throw new Error(`Error retrieving member:\n${error}`);

@@ -5,8 +5,11 @@ import {
     getAllTeamsController,
     getTeamController,
     deleteTeamController,
-    updateTeamController
+    updateTeamController,
+    uploadTeamImageController,
+    getTeamImageController
 } from "../controller/teamDataController.js";
+
 
 const router = Router();
 
@@ -15,5 +18,8 @@ router.get('/', isAuthenticatedUserMiddleware, getAllTeamsController);
 router.get('/:id', isAuthenticatedUserMiddleware, getTeamController);
 router.delete('/:id', isAuthenticatedUserMiddleware, deleteTeamController);
 router.put('/:id', isAuthenticatedUserMiddleware, updateTeamController);
+router.post('/image', isAuthenticatedUserMiddleware, uploadTeamImageController);
+router.get('/image/:filename', getTeamImageController);
+
 
 export default router;

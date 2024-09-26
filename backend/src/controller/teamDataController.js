@@ -1,10 +1,12 @@
 import {
-    getAllTeams, 
+    getAllTeams,
     getTeam,
     addTeam,
     updateTeam,
-    deleteTeam
-} from "../services/teamDataService.js"
+    deleteTeam,
+    uploadTeamImage,
+    getTeamImage
+} from "../services/teamDataService.js";
 
 /**
  * Controller that gets all teams
@@ -19,11 +21,11 @@ export async function getAllTeamsController(req, res) {
             success: true,
             data: teams,
         });
-        
+
     } catch (err) {
         res.status(400).json({
-            success: false, 
-            error: err.message, 
+            success: false,
+            error: err.message,
         })
     }
 }
@@ -38,13 +40,13 @@ export async function createTeamController(req, res) {
         const newTeam = await addTeam(req.body);  // Use the request body data to create a new team
 
         res.status(200).json({
-            success: true, 
+            success: true,
             data: newTeam,
         })
     } catch (err) {
         res.status(400).json({
-            success: false, 
-            message: err.message, 
+            success: false,
+            message: err.message,
         });
     }
 }
@@ -64,13 +66,13 @@ export async function getTeamController(req, res) {
         }
 
         res.status(200).json({
-            success: true, 
+            success: true,
             data: team,
         })
     } catch (err) {
         res.status(400).json({
-            success: false, 
-            message: err.message, 
+            success: false,
+            message: err.message,
         });
     }
 }
@@ -86,13 +88,13 @@ export async function updateTeamController(req, res) {
         const team = await updateTeam(id, req.body);
 
         res.status(200).json({
-            success: true, 
+            success: true,
             data: team,
         })
     } catch (err) {
         res.status(400).json({
-            success: false, 
-            message: err.message, 
+            success: false,
+            message: err.message,
         });
     }
 }
@@ -106,15 +108,67 @@ export async function deleteTeamController(req, res) {
     try {
         const id = req.params.id;  // Get team ID from request parameters
         const deleted = await deleteTeam(id);  // "Delete" the team
-        
+
         res.status(200).json({
-            success: true, 
+            success: true,
             data: deleted,
         })
     } catch (err) {
         res.status(400).json({
-            success: false, 
-            message: err.message, 
+            success: false,
+            message: err.message,
+        });
+    }
+}
+
+export async function uploadTeamImageController(req, res) {
+    try {
+        await new Promise((resolve, reject) => {
+            uploadTeamImage(req, res, function (err) {
+                if (res.headersSent) {
+                    return;
+                }
+                if (err) {
+                    return res.status(500).json({
+                        success: false,
+                        message: 'Failed to upload image',
+                        error: err.message,
+                    });
+                } else {
+                    resolve();
+                }
+            });
+        });
+
+        if (!req.file) {
+            throw new Error('No file uploaded');
+        }
+        return res.status(200).json({
+            success: true,
+            file: `/teamImage/${req.file.filename}`,
+        });
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            message: err.message
+        });
+    }
+}
+
+export async function getTeamImageController(req, res) {
+    try {
+        res.sendFile(getTeamImage(req.params.filename), function (err) {
+            if (err) {
+                res.status(400).json({
+                    success: false,
+                    message: err.message,
+                });
+            }
+        });
+    } catch (err) {
+        res.status(400).json({
+            success: false,
+            message: err.message,
         });
     }
 }

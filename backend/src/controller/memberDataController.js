@@ -57,7 +57,7 @@ export async function createMemberController(req, res) {
 export async function getMemberController(req, res) {
     try {
         const id = req.params.id;  // Get member ID from request parameters
-        const member = getMember(id);  // Member ID is the primary key used to find a member
+        const member = await getMember(id);  // Member ID is the primary key used to find a member
 
         if (!member) {
             throw Error("Member not found");
@@ -121,7 +121,17 @@ export async function deleteMemberController(req, res) {
 
 export async function uploadMemberImageController(req, res) {
     try {
-        uploadMemberImage.single('memberImage');
+
+        uploadMemberImage(req, res, (err) => {
+            if (err) {
+                return res.status(500).json({
+                    success: false,
+                    message: 'Failed to upload image',
+                    error: err.message,
+                });
+            }
+        });
+
         if(!req.file){throw new Error('No file uploaded');}
         res.status(200).json({
             success: true,

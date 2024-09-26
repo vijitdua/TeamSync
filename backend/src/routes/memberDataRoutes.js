@@ -19,9 +19,6 @@ router.delete('/:id', isAuthenticatedUserMiddleware, deleteMemberController);
 router.put('/:id', isAuthenticatedUserMiddleware, updateMemberController);
 
 router.post('/image', isAuthenticatedUserMiddleware, uploadMemberImageController);
-router.get('/image/:filename', (req,res, next)=>{
-    console.log(join(env.root_location, 'memberImage', 'test.png'));
-    next();
-}, getMemberImageController);
+router.get('/image/:filename', getMemberImageController);
 
 export default router;

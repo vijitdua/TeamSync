@@ -155,19 +155,29 @@ const memberImageStorage = multer.diskStorage({
 });
 
 /**
- * usage example:
+ * Example usage:
+ *
+ * This endpoint handles the upload of member images. It expects a single file upload with the field name 'image'.
+ *
  * ```js
- * // Handle member image uploads
- * app.post('/upload/member', uploadMemberImage.single('memberImage'), (req, res) => {
- *   if (!req.file) {
- *     return res.status(400).send('No file uploaded.');
- *   }
- *   res.send({ message: 'File uploaded successfully', url: `/memberImage/${req.file.filename}` });
+ * // Example route for handling member image uploads
+ * app.post('/upload/member', (req, res) => {
+ *   uploadMemberImage(req, res, (err) => {
+ *     if (err) {
+ *       return res.status(500).send({ error: 'Failed to upload image' });
+ *     }
+ *     if (!req.file) {
+ *       return res.status(400).send({ error: 'No file uploaded' });
+ *     }
+ *     res.send({ message: 'File uploaded successfully', url: `/memberImage/${req.file.filename}` });
+ *   });
  * });
  * ```
+ *
+ * `uploadMemberImage` handles the image upload process, storing the file and making it accessible via the returned URL.
  */
-export const uploadMemberImage = multer({ storage: memberImageStorage });
+export const uploadMemberImage = multer({ storage: memberImageStorage }).single('image');
 
 export function getMemberImage(filename){
-    return join(join(env.root_location, 'memberImage'),`${filename}`);
+    return join(join(env.rootLocation, 'memberImage'),`${filename}`);
 }

@@ -18,5 +18,8 @@ export const env = {
     databasePassword: process.env.DATABASE_PASSWORD,
     passportSecret: process.env.PASSPORT_SECRET,
     serverLocation: process.env.SERVER_LOCATION,
-    root_location: projectRoot,
+    rootLocation: projectRoot,
+    redisHost: process.env.REDIS_HOST,
+    redisPort: process.env.REDIS_PORT,
+    redisPassword: process.env.REDIS_PASSWORD,
 }

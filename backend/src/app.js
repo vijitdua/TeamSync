@@ -7,24 +7,33 @@ import session from "express-session";
 import flash from "connect-flash";
 import passport from "passport";
 import teamDataRoutes from "./routes/teamDataRoutes.js";
-import memberDataRoutes from "./routes/memberDataRoutes.js"; // Import connect-flash for flash messages
+import memberDataRoutes from "./routes/memberDataRoutes.js";
+import RedisStore from "connect-redis";
+import redisClient from "./config/redis.js";
 
 const app = express();
 
 const corsOptions={
     // Disable COR origin during testing
     // origin: env.corsOrigin,
-    optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+    // credentials: true, // Allows sending Cookies for authentication
+    optionsSuccessStatus: 200 // avoid 204 choke.
 };
 
-app.use(cors(corsOptions)); // Use cors in express app with the cors configuration.
-app.use(express.json()); // Parse json as middleware (performance improvements, prevents misc. injections)
+app.use(cors(corsOptions));
+app.use(express.json());
 
-// Session setup (required for `connect-flash` to work)
 app.use(session({
+    store: new RedisStore({ client: redisClient }),
     secret: env.passportSecret,
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    cookie: {
+        maxAge: 30 * (24 * 60 * 60 * 1000), // 30 day expiry
+        secure: false, // Not secure because of Cloudflare Flexible SSL, security should be enabled for most users.
+        httpOnly: true,
+        sameSite: 'None', // Allow CORs
+    }
 }));
 
 // Initialize passport and connect-flash middleware

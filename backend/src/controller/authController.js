@@ -3,28 +3,44 @@ import passport from '../config/passport.js';
 /**
  * Middleware to handle dynamic redirect URLs for login.
  */
-export const loginController = (req, res, next) => {
-    const successRedirect = req.query.successRedirect || '/';
-    const failureRedirect = req.query.failureRedirect || '/login-fail';
-
-    passport.authenticate('login', {
-        successRedirect,
-        failureRedirect,
-        failureFlash: true
+export function loginController(req, res, next){
+    passport.authenticate('login', (err, user, info) => {
+        if (err) {
+            return res.status(500).json({ success: false, message: 'An error occurred during login.', error: err });
+        }
+        if (!user) {
+            return res.status(401).json({ success: false, message: info.message || 'Login failed.' });
+        }
+        // Log in the user manually
+        req.login(user, (loginErr) => {
+            if (loginErr) {
+                return res.status(500).json({ success: false, message: 'Login failed after authentication.', error: loginErr });
+            }
+            // If login is successful, send the cookie and a success response
+            return res.status(200).json({ success: true});
+        });
     })(req, res, next);
-};
+}
 
 /**
  * Middleware to handle dynamic redirect URLs for signup.
  */
 export const signupController = (req, res, next) => {
-    const successRedirect = req.query.successRedirect || '/';
-    const failureRedirect = req.query.failureRedirect || '/signup-fail';
-
-    passport.authenticate('signup', {
-        successRedirect,
-        failureRedirect,
-        failureFlash: true
+    passport.authenticate('signup', (err, user, info) => {
+        if (err) {
+            return res.status(500).json({ success: false, message: 'An error occurred during signup.', error: err });
+        }
+        if (!user) {
+            return res.status(401).json({ success: false, message: info.message || 'Signup failed.' });
+        }
+        // Log in the user manually after signup
+        req.login(user, (loginErr) => {
+            if (loginErr) {
+                return res.status(500).json({ success: false, message: 'Signup successful, but login failed.', error: loginErr });
+            }
+            // Success, send user data and set cookie
+            return res.status(200).json({ success: true});
+        });
     })(req, res, next);
 };
 

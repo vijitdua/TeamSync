@@ -1,6 +1,5 @@
-import { organizationTeamModel } from "../models/teamDataModel.js";
+import { organizationTeamModel } from "../models/organizationTeamModel.js";
 import multer from "multer";
-import { v4 as uuidv4 } from "uuid";
 import { join } from "path";
 import { env } from "../config/env.js";
 import { teamImageStorage } from "../config/multerStorage.js";

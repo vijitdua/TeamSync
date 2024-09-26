@@ -145,54 +145,87 @@ export async function deleteMember(id) {
 }
 
 /**
- * Example usage:
+ * Handles the upload of member images using Multer.
  *
- * This endpoint handles the upload of member images. It expects a single file upload with the field name 'image'.
+ * **Important:** When using `uploadMemberImage`, wrap its invocation inside a Promise in your controller function to ensure proper asynchronous handling. This prevents the parent function from mistakenly believing the file upload failed even if it was successful.
  *
- * ### Posting Instructions:
+ * **Example Usage in Controller:**
  *
- * 1. HTTP method as `POST`.
- * 2. Set the URL to the correct endpoint.
- * 3. **Body** select `form-data`.
- * 4. Add a new key with the name `image` (this is the field name that multer expects).
- * 5. Set the type to **File**, and select the file you want to upload.
- * ### Programmatically (using JavaScript and Fetch API):
+ * ```javascript
+ * export async function uploadMemberImageController(req, res) {
+ *   try {
+ *     await new Promise((resolve, reject) => {
+ *       uploadMemberImage(req, res, (err) => {
+ *         if (err) {
+ *           reject(err);
+ *         } else {
+ *           resolve();
+ *         }
+ *       });
+ *     });
  *
- * ```js
+ *     if (!req.file) {
+ *       throw new Error('No file uploaded');
+ *     }
+ *
+ *     res.status(200).json({
+ *       success: true,
+ *       file: `/memberImage/${req.file.filename}`,
+ *     });
+ *   } catch (err) {
+ *     if (res.headersSent) return;
+ *     res.status(400).json({
+ *       success: false,
+ *       message: err.message,
+ *     });
+ *   }
+ * }
+ * ```
+ *
+ * **Posting Instructions:**
+ *
+ * 1. **HTTP Method:** `POST`
+ * 2. **URL:** Set to the correct endpoint.
+ * 3. **Body:** Use `form-data`.
+ *    - Key: `image` (this is the field name that Multer expects)
+ *    - Type: **File**
+ *    - Value: Select the file you want to upload.
+ *
+ * **Programmatic Example (JavaScript Fetch API):**
+ *
+ * ```javascript
  * const formData = new FormData();
- * formData.append('image', fileInput.files[0]); // 'image' should match the field name
+ * formData.append('image', fileInput.files[0]); // 'image' matches the field name
  *
- * fetch('http://localhost:3000/example', {
+ * fetch('http://localhost:3000/your-endpoint', {
  *   method: 'POST',
  *   body: formData,
  * })
- * .then(response => response.json())
- * .then(data => console.log(data))
- * .catch(error => console.error('Error:', error));
+ *   .then(response => response.json())
+ *   .then(data => console.log(data))
+ *   .catch(error => console.error('Error:', error));
  * ```
  *
- * In this example, `fileInput` represents the file input field in a form.
+ * **Note:** In this example, `fileInput` represents the file input field in a form.
  *
- * ### Example route for handling member image uploads:
+ * **Description:**
  *
- * ```js
- * router.post('/image', (req, res) => {
- *   uploadMemberImage(req, res, (err) => {
- *     if (err) {
- *       return res.status(500).send({ error: 'Failed to upload image' });
- *     }
- *     if (!req.file) {
- *       return res.status(400).send({ error: 'No file uploaded' });
- *     }
- *     res.send({ message: 'File uploaded successfully', url: `/memberImage/${req.file.filename}` });
- *   });
- * });
- * ```
+ * `uploadMemberImage` configures Multer to handle image uploads, storing files in the `memberImage/` directory. Only files submitted under the field name `'image'` are accepted.
  *
- * `uploadMemberImage` handles the image upload process, storing the file in the `memberImage/` directory and making it accessible via the returned URL.
- * @throws Error if unsuccessful
+ * @throws Error if the upload is unsuccessful.
  */
-export const uploadMemberImage = multer({ storage: memberImageStorage }).single('image');
+export const uploadMemberImage = multer({
+    storage: memberImageStorage,
+    fileFilter: (req, file, cb) => {
+        // Only accept file if it’s in the 'image' field
+        if (file.fieldname === 'image') {
+            cb(null, true);
+        } else {
+            console.log(`Invalid field for file upload: ${file.fieldname}`);
+            cb(new Error('Invalid file upload field'));
+        }
+    }
+}).single('image');
 
 
 export function getMemberImage(filename){

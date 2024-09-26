@@ -122,23 +122,32 @@ export async function deleteMemberController(req, res) {
 export async function uploadMemberImageController(req, res) {
     try {
 
-        uploadMemberImage(req, res, (err) => {
-            if (err) {
-                return res.status(500).json({
-                    success: false,
-                    message: 'Failed to upload image',
-                    error: err.message,
-                });
-            }
+        await new Promise((resolve, reject) => {
+            uploadMemberImage(req, res, function (err) {
+                if (res.headersSent) {
+                    return; // Avoid crash when attaching files in invalid fields
+                }
+                if (err) {
+                    return res.status(500).json({
+                        success: false,
+                        message: 'Failed to upload image',
+                        error: err.message,
+                    });
+                } else {
+                    resolve();
+                }
+            });
         });
 
-        if(!req.file){throw new Error('No file uploaded');}
-        res.status(200).json({
+        if(!req.file){
+            throw new Error('No file uploaded');
+        }
+        return res.status(200).json({
             success: true,
             file: `/memberImage/${req.file.filename}`,
         });
     } catch (err) {
-        res.status(400).json({
+        return res.status(400).json({
             success: false,
             message: err.message
         });

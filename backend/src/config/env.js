@@ -11,7 +11,7 @@ const projectRoot = join(__dirname, '../../'); // Navigate up to the project roo
 export const env = {
     corsOrigin: process.env.CORS_ORIGIN,
     discordBot: process.env.DISCORD_BOT_TOKEN,
-    port: process.env.port || 3000,
+    port: process.env.PORT || 3000,
     database: process.env.DATABASE,
     databaseHost: process.env.DATABASE_HOST,
     databaseUser: process.env.DATABASE_USER,

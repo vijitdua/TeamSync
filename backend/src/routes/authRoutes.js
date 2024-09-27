@@ -1,9 +1,10 @@
 import {Router} from 'express';
-import {isAuthenticatedUser, loginController, signupController} from "../controller/authController.js";
+import {loginController, signupController} from "../controller/authController.js";
+import {authRateLimit} from "../middleware/rateLimit.js";
 
 const router = Router();
 
-router.post('/login' , loginController);
-router.post('/signup', signupController);
+router.post('/login', authRateLimit, loginController);
+router.post('/signup', authRateLimit, signupController);
 
 export default router;

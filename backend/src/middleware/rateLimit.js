@@ -10,3 +10,14 @@ export const authRateLimit = rateLimit({
     standardHeaders: true,
     legacyHeaders: false,
 });
+
+export const globalRateLimit = rateLimit({
+    windowMs: 60 * 1000, // 1 minute
+    max: 500, // Limit each IP to specific requests per minute, prevent bot's usage
+    message: {
+        success: false,
+        message: 'Too many requests, please try again later'
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+});

@@ -11,8 +11,11 @@ import memberDataRoutes from "./routes/memberDataRoutes.js";
 import RedisStore from "connect-redis";
 import redisClient from "./config/redis.js";
 import {conditionalJson} from "./middleware/conditionalJson.js";
+import {globalRateLimit} from "./middleware/rateLimit.js";
 
 const app = express();
+
+app.use(globalRateLimit);
 
 const corsOptions={
     // Disable COR origin during testing

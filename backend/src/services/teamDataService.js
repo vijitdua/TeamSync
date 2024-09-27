@@ -58,6 +58,30 @@ export async function getTeam(id, isAuthenticated = false) {
 }
 
 /**
+ * Get a team's ID based on its Discord role ID
+ * @param {number} discordId - The Discord role ID of the team to retrieve (Required).
+ * @returns {Promise<string>} - A promise that resolves to the team ID if found.
+ * @throws {Error} - Throws an error if the team cannot be found.
+ */
+export async function getTeamByDiscordId(discordId) {
+    try {
+        // Find the team by its discordId
+        const team = await organizationTeamModel.findOne({
+            where: { discordId: discordId },
+            attributes: ['id'], // Only return the 'id' field
+        });
+
+        if (!team) {
+            throw new Error(`Team with Discord role ID ${discordId} not found`);
+        }
+
+        return team.id;
+    } catch (error) {
+        throw new Error(`Error retrieving team by Discord role ID:\n${error}`);
+    }
+}
+
+/**
  * Adds a new team to the organization
  * @param {Object} data Object containing Team Data
  * @param {string} data.name Team name (Required)

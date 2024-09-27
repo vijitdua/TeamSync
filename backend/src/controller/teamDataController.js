@@ -5,7 +5,7 @@ import {
     updateTeam,
     deleteTeam,
     uploadTeamImage,
-    getTeamImage
+    getTeamImage, getTeamByDiscordId
 } from "../services/teamDataService.js";
 import {isAuthenticatedUser} from "./authController.js";
 
@@ -72,6 +72,28 @@ export async function getTeamController(req, res) {
             success: true,
             data: team,
         })
+    } catch (err) {
+        res.status(400).json({
+            success: false,
+            message: err.message,
+        });
+    }
+}
+
+/**
+ * Controller that retrieves a team's ID based on its Discord role ID
+ * When successful, sends status 200 with the team ID
+ * When unsuccessful, sends 400 status with false success and an error message
+ */
+export async function getTeamByDiscordIdController(req, res) {
+    try {
+        const discordId = req.params.discordId;  // Get Discord role ID from request parameters
+        const teamId = await getTeamByDiscordId(discordId);  // Fetch the team's ID based on Discord role ID
+
+        res.status(200).json({
+            success: true,
+            data: { id: teamId },
+        });
     } catch (err) {
         res.status(400).json({
             success: false,

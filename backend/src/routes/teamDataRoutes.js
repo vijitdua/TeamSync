@@ -7,7 +7,7 @@ import {
     deleteTeamController,
     updateTeamController,
     uploadTeamImageController,
-    getTeamImageController
+    getTeamImageController, getTeamByDiscordIdController
 } from "../controller/teamDataController.js";
 
 
@@ -15,6 +15,7 @@ const router = Router();
 
 // Fully public route
 router.get('/', getAllTeamsController);
+router.get('/discord/:discordId', getTeamByDiscordIdController);
 router.get('/image/:filename', getTeamImageController);
 
 // Semi-Public routes (data might differ based on auth state which is checked inside controllers)

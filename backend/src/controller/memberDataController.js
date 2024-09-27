@@ -3,7 +3,7 @@ import {
     getMember,
     addMember,
     updateMember,
-    deleteMember, uploadMemberImage, getMemberImage
+    deleteMember, uploadMemberImage, getMemberImage, getMemberByDiscordId
 } from "../services/memberDataService.js";
 import {isAuthenticatedUser} from "./authController.js";
 
@@ -69,6 +69,29 @@ export async function getMemberController(req, res) {
             success: true,
             data: member,
         })
+    } catch (err) {
+        res.status(400).json({
+            success: false,
+            message: err.message,
+        });
+    }
+}
+
+/**
+ * Controller that retrieves a member's ID based on their Discord ID
+ * When successful, sends status 200 with the member ID
+ * When unsuccessful, sends 400 status with false success and an error message
+ */
+export async function getMemberByDiscordIdController(req, res) {
+    try {
+        const discordId = req.params.discordId;  // Get discord ID from request parameters
+        console.log(discordId);
+        const memberId = await getMemberByDiscordId(discordId);  // Fetch the member's ID based on Discord ID
+
+        res.status(200).json({
+            success: true,
+            data: { id: memberId },
+        });
     } catch (err) {
         res.status(400).json({
             success: false,

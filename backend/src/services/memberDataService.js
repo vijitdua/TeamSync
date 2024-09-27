@@ -49,7 +49,7 @@ export async function getMember(id, isAuthenticated = false) {
 
         if (!isAuthenticated) {
             // Exclude private data from member object when user is not authenticated
-            const { customDataPrivate, ...publicData } = member.dataValues;
+            const { customDataPrivate, notes, ...publicData } = member.dataValues;
             return publicData;
         }
 
@@ -58,6 +58,31 @@ export async function getMember(id, isAuthenticated = false) {
         throw new Error(`Error retrieving member:\n${error}`);
     }
 }
+
+/**
+ * Get a member's ID based on their Discord ID
+ * @param {number} discordId - The Discord ID of the member to retrieve (Required).
+ * @returns {Promise<string>} - A promise that resolves to the member ID if found.
+ * @throws {Error} - Throws an error if the member cannot be found.
+ */
+export async function getMemberByDiscordId(discordId) {
+    try {
+        // Find the member by their discordId
+        const member = await organizationMemberModel.findOne({
+            where: { discordId: discordId },
+            attributes: ['id'], // Only return the 'id' field
+        });
+
+        if (!member) {
+            throw new Error(`Member with Discord ID ${discordId} not found`);
+        }
+
+        return member.id;
+    } catch (error) {
+        throw new Error(`Error retrieving member by Discord ID:\n${error}`);
+    }
+}
+
 
 /**
  * Adds a new member to the organization

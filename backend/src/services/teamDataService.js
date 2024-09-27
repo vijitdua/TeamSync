@@ -47,7 +47,7 @@ export async function getTeam(id, isAuthenticated = false) {
 
         if (!isAuthenticated) {
             // Exclude private data from team object when user is not authenticated
-            const { customDataPrivate, ...publicData } = team.dataValues;
+            const { customDataPrivate, notes, ...publicData } = team.dataValues;
             return publicData;
         }
 

@@ -10,7 +10,7 @@ export async function getAllRoles() {
 }
 
 export async function getRoleByID(discordRoleID) {
-    return await discordGuildRoleModel.findOne({ where: { discordRoleID } });
+    return await discordGuildRoleModel.findOne({ where: { discordID: discordRoleID } });
 }
 
 // Delete a specific role by ID

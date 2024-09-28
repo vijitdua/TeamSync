@@ -12,6 +12,8 @@ import RedisStore from "connect-redis";
 import redisClient from "./config/redis.js";
 import {conditionalJson} from "./middleware/conditionalJson.js";
 import {globalRateLimit} from "./middleware/rateLimit.js";
+import discordMemberRoutes from "./routes/discordMemberRoutes.js";
+import discordRoleRoutes from "./routes/discordRoleRoutes.js";
 
 const app = express();
 
@@ -48,6 +50,8 @@ app.use(flash()); // Add connect-flash middleware
 app.use("/auth", authRoutes);
 app.use("/team", teamDataRoutes);
 app.use("/member", memberDataRoutes);
+app.use("/discord/member", discordMemberRoutes);
+app.use("/discord/role", discordRoleRoutes);
 
 // Server config
 const server = http.createServer(app);

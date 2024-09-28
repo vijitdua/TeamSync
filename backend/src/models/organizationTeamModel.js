@@ -74,6 +74,9 @@ export const organizationTeamModel = sequelize.define("organizationTeamModel", {
         allowNull: true,
     },
 
+}, {
+    tableName: 'organizationTeamModel',
+
 });
 
 

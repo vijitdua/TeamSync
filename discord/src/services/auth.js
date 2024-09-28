@@ -1,10 +1,10 @@
 import axios from 'axios';
-import { env } from './env.js';
+import { env } from '../config/env.js';
 
 let sessionCookie = null;
 
 // Function to log into the backend
-async function loginToBackend() {
+async function auth() {
     try {
         const response = await axios.post(
             `${env.backendURL}/auth/login`,
@@ -28,4 +28,4 @@ async function loginToBackend() {
     }
 }
 
-export { loginToBackend, sessionCookie };
+export { auth, sessionCookie };

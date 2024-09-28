@@ -10,7 +10,7 @@ export async function getMemberByUsername(discordUsername) {
 
 export async function getAllMembersIDs() {
     const members = await discordGuildMemberModel.findAll({ attributes: ['discordID'] });
-    return members.map(member => member.discordID);
+    return members.map(member => member.discordID);  // Return an array of member UUIDs
 }
 
 export async function getMemberByID(discordID) {

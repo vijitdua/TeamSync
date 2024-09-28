@@ -5,7 +5,8 @@ export async function createRole(data) {
 }
 
 export async function getAllRoles() {
-    return await discordGuildRoleModel.findAll();
+    const roles = await discordGuildRoleModel.findAll({ attributes: ['discordID'] });
+    return roles.map(role => role.discordID);  // Return an array of role UUIDs
 }
 
 export async function getRoleByID(discordRoleID) {

@@ -49,7 +49,7 @@ export async function getMember(id, isAuthenticated = false) {
 
         if (!isAuthenticated) {
             // Exclude private data from member object when user is not authenticated
-            const { customDataPrivate, notes, ...publicData } = member.dataValues;
+            const { customDataPrivate, phoneNumber, email, notes, ...publicData } = member.dataValues;
             return publicData;
         }
 

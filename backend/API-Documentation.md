@@ -575,6 +575,48 @@
 - **Authentication**: Required.
 - **Cookies Sent**: Authenticated session cookies (`sessionID`).
 
+### DELETE `/discord/member/:discordID`
+- **Description**: Deletes a specific Discord member by their Discord ID.
+- **Parameters**:
+    - `discordID` (BIGINT): The Discord ID of the member.
+- **Response**:
+    - `200 OK`: Member deleted successfully.
+        ```json
+        {
+          "success": true,
+          "message": "Member deleted successfully"
+        }
+        ```
+    - `404 Not Found`: Member not found.
+        ```json
+        {
+          "success": false,
+          "message": "Member not found"
+        }
+        ```
+- **Authentication**: Required.
+- **Cookies Sent**: Authenticated session cookies (`sessionID`).
+
+### DELETE `/discord/member`
+- **Description**: Deletes all Discord members.
+- **Response**:
+    - `200 OK`: All members deleted successfully.
+        ```json
+        {
+          "success": true,
+          "message": "All members deleted successfully"
+        }
+        ```
+    - `400 Bad Request`: Error deleting members.
+        ```json
+        {
+          "success": false,
+          "message": "Error deleting all members"
+        }
+        ```
+- **Authentication**: Required.
+- **Cookies Sent**: Authenticated session cookies (`sessionID`).
+
 ---
 
 ## Discord Role Routes (`/discord/role`)
@@ -652,6 +694,48 @@
         {
           "success": false,
           "message": "Error creating Discord role"
+        }
+        ```
+- **Authentication**: Required.
+- **Cookies Sent**: Authenticated session cookies (`sessionID`).
+
+### DELETE `/discord/role/:discordRoleID`
+- **Description**: Deletes a specific Discord role by its ID.
+- **Parameters**:
+    - `discordRoleID` (BIGINT): The Discord role ID.
+- **Response**:
+    - `200 OK`: Role deleted successfully.
+        ```json
+        {
+          "success": true,
+          "message": "Role deleted successfully"
+        }
+        ```
+    - `404 Not Found`: Role not found.
+        ```json
+        {
+          "success": false,
+          "message": "Role not found"
+        }
+        ```
+- **Authentication**: Required.
+- **Cookies Sent**: Authenticated session cookies (`sessionID`).
+
+### DELETE `/discord/role`
+- **Description**: Deletes all Discord roles.
+- **Response**:
+    - `200 OK`: All roles deleted successfully.
+        ```json
+        {
+          "success": true,
+          "message": "All roles deleted successfully"
+        }
+        ```
+    - `400 Bad Request`: Error deleting roles.
+        ```json
+        {
+          "success": false,
+          "message": "Error deleting all roles"
         }
         ```
 - **Authentication**: Required.

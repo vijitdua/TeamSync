@@ -4,13 +4,16 @@ import {
     createMemberController,
     getMemberByUsernameController,
     getAllMembersIDsController,
-    getMemberByIDController
+    getMemberByIDController, deleteAllMembersController, deleteMemberByIDController
 } from "../controller/discordMemberController.js";
 
 const router = Router();
 
 // Private Routes
 router.post('/', isAuthenticatedUserMiddleware, createMemberController);
+router.delete('/:discordID', isAuthenticatedUserMiddleware, deleteMemberByIDController);
+router.delete('/', isAuthenticatedUserMiddleware, deleteAllMembersController);
+
 
 // Public Routes
 router.get('/', getAllMembersIDsController);

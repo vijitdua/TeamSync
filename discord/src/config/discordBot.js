@@ -1,7 +1,8 @@
 // discordBot.js
 import { Client, Events, GatewayIntentBits } from 'discord.js';
 import { env } from './env.js';
-import registerCommands from './discordSlashCommand.js'; // Import the registration script
+import registerCommands from './discordSlashCommand.js';
+import {loginToBackend} from "./loginToBackend.js"; // Import the registration script
 
 // Client configuration
 const client = new Client({
@@ -16,6 +17,10 @@ const client = new Client({
 // Client login and slash command registration
 client.once(Events.ClientReady, async (readyClient) => {
     console.log(`Ready! Logged in as ${readyClient.user.tag}`);
+
+    // Login to the backend
+    await loginToBackend();
+
     // Register slash commands when the bot is ready
     await registerCommands(client);
 });

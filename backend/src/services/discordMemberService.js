@@ -16,3 +16,13 @@ export async function getAllMembersIDs() {
 export async function getMemberByID(discordID) {
     return await discordGuildMemberModel.findOne({ where: { discordID } });
 }
+
+// Delete a specific member by ID
+export async function deleteMemberByID(discordID) {
+    return await discordGuildMemberModel.destroy({ where: { discordID } });
+}
+
+// Delete all members
+export async function deleteAllMembers() {
+    return await discordGuildMemberModel.destroy({ where: {} });
+}

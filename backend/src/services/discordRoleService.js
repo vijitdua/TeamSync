@@ -12,3 +12,13 @@ export async function getAllRoles() {
 export async function getRoleByID(discordRoleID) {
     return await discordGuildRoleModel.findOne({ where: { discordRoleID } });
 }
+
+// Delete a specific role by ID
+export async function deleteRoleByID(discordRoleID) {
+    return await discordGuildRoleModel.destroy({ where: { discordRoleID } });
+}
+
+// Delete all roles
+export async function deleteAllRoles() {
+    return await discordGuildRoleModel.destroy({ where: {} });
+}

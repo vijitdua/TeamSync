@@ -1,4 +1,4 @@
-import { getAllRoles, getRoleByID, createRole } from "../services/discordRoleService.js";
+import {getAllRoles, getRoleByID, createRole, deleteAllRoles, deleteRoleByID} from "../services/discordRoleService.js";
 
 export async function createRoleController(req, res) {
     try {
@@ -24,6 +24,28 @@ export async function getRoleByIDController(req, res) {
         const role = await getRoleByID(discordRoleID);
         if (!role) throw new Error("Role not found");
         res.status(200).json({ success: true, data: role });
+    } catch (err) {
+        res.status(400).json({ success: false, message: err.message });
+    }
+}
+
+// Delete a specific role by ID
+export async function deleteRoleByIDController(req, res) {
+    try {
+        const { discordRoleID } = req.params;
+        const deleted = await deleteRoleByID(discordRoleID);
+        if (!deleted) throw new Error("Role not found");
+        res.status(200).json({ success: true, message: "Role deleted successfully" });
+    } catch (err) {
+        res.status(400).json({ success: false, message: err.message });
+    }
+}
+
+// Delete all roles
+export async function deleteAllRolesController(req, res) {
+    try {
+        await deleteAllRoles();
+        res.status(200).json({ success: true, message: "All roles deleted successfully" });
     } catch (err) {
         res.status(400).json({ success: false, message: err.message });
     }

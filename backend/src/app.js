@@ -45,9 +45,9 @@ app.use(passport.initialize()); // Initialize passport
 app.use(passport.session()); // Persistent login sessions
 app.use(flash()); // Add connect-flash middleware
 
-app.use("/api/auth", authRoutes);
-app.use("/api/team", teamDataRoutes);
-app.use("/api/member", memberDataRoutes);
+app.use("/auth", authRoutes);
+app.use("/team", teamDataRoutes);
+app.use("/member", memberDataRoutes);
 
 // Server config
 const server = http.createServer(app);

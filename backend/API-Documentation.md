@@ -500,7 +500,8 @@
             "discordID": 933604018951974924,
             "discordUsername": "username",
             "discordDisplayName": "Display Name",
-            "discordProfilePictureUrl": "https://example.com/profile.png"
+            "discordProfilePictureUrl": "https://example.com/profile.png",
+            "discordRoles": [933604018951974924, 933604018951974925]
           }
         }
         ```
@@ -527,7 +528,8 @@
             "discordID": 933604018951974924,
             "discordUsername": "username",
             "discordDisplayName": "Display Name",
-            "discordProfilePictureUrl": "https://example.com/profile.png"
+            "discordProfilePictureUrl": "https://example.com/profile.png",
+            "discordRoles": [933604018951974924, 933604018951974925]
           }
         }
         ```
@@ -549,7 +551,8 @@
       "discordID": 933604018951974924,
       "discordUsername": "username",
       "discordDisplayName": "Display Name",
-      "discordProfilePictureUrl": "https://example.com/profile.png"
+      "discordProfilePictureUrl": "https://example.com/profile.png",
+      "discordRoles": [933604018951974924, 933604018951974925]
     }
     ```
 - **Response**:
@@ -561,7 +564,8 @@
             "discordID": 933604018951974924,
             "discordUsername": "username",
             "discordDisplayName": "Display Name",
-            "discordProfilePictureUrl": "https://example.com/profile.png"
+            "discordProfilePictureUrl": "https://example.com/profile.png",
+            "discordRoles": [933604018951974924, 933604018951974925]
           }
         }
         ```

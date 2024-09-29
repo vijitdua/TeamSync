@@ -20,9 +20,15 @@ export const discordGuildMemberModel = sequelize.define('discordGuildMembers', {
         validate: {
             isUrl: true,
         },
-    }
+    },
+    // Teams of the organization that member is in
+    discordRoles: {
+        type: DataTypes.ARRAY(DataTypes.BIGINT),
+        allowNull: true,
+        defaultValue: [], // Default to an empty array
+    },
 }, {
     tableName: 'discordGuildMembers',
 });
 
-discordGuildMemberModel.sync();
+discordGuildMemberModel.sync({alter: true});

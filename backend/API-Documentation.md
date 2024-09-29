@@ -657,7 +657,7 @@
           "data": {
             "discordID": 933604018951974924,
             "roleName": "Admin",
-            "discordRoleID": 933604018951974924
+            "roleColor": "#3498db"
           }
         }
         ```
@@ -678,7 +678,7 @@
     {
       "discordID": 933604018951974924,
       "roleName": "Admin",
-      "discordRoleID": 933604018951974924
+      "roleColor": "#3498db"
     }
     ```
 - **Response**:
@@ -689,7 +689,8 @@
           "data": {
             "discordID": 933604018951974924,
             "roleName": "Admin",
-            "discordRoleID": 933604018951974924
+            "discordRoleID": 933604018951974924,
+            "roleColor": "#3498db"
           }
         }
         ```

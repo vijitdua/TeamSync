@@ -4,13 +4,14 @@ import { env } from '../config/env.js';
 import { sessionCookie } from './auth.js'; // Import session cookie from auth.js
 
 // Function to initialize or update a member's details
-async function updateMemberDetails(discordID, discordUsername, discordDisplayName, discordProfilePictureUrl) {
+async function updateMemberDetails(discordID, discordUsername, discordDisplayName, discordProfilePictureUrl, discordRoles) {
     try {
         const memberData = {
             discordID,
             discordUsername,
             discordDisplayName,
             discordProfilePictureUrl,
+            discordRoles
         };
 
         const response = await axios.post(`${env.backendURL}/discord/member`, memberData, {
@@ -57,9 +58,10 @@ async function reinitializeMembers(guild) {
             const discordUsername = member.user.username;
             const discordDisplayName = member.displayName;
             const discordProfilePictureUrl = member.user.displayAvatarURL();
+            const discordRoleIDs = member.roles.cache.map(role => role.id); // TODO
 
             // Reinitialize member in the backend
-            await updateMemberDetails(discordID, discordUsername, discordDisplayName, discordProfilePictureUrl);
+            await updateMemberDetails(discordID, discordUsername, discordDisplayName, discordProfilePictureUrl, discordRoleIDs);
         }
         console.log('Members reinitialized successfully.');
     } catch (error) {

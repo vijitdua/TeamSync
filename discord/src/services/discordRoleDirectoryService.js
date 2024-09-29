@@ -4,11 +4,12 @@ import { env } from '../config/env.js';
 import { sessionCookie } from './auth.js'; // Import session cookie from auth.js
 
 // Function to initialize or update a role's details
-async function updateRoleDetails(discordRoleID, roleName) {
+async function updateRoleDetails(discordRoleID, roleName, roleColor) {
     try {
         const roleData = {
             discordID: discordRoleID,
             roleName,
+            roleColor: roleColor || null,
         };
 
         const response = await axios.post(`${env.backendURL}/discord/role`, roleData, {
@@ -53,9 +54,10 @@ async function reinitializeRoles(guild) {
         for (const [id, role] of roles) {
             const discordRoleID = role.id;
             const roleName = role.name;
+            const roleColor = role.hexColor;
 
             // Reinitialize role in the backend
-            await updateRoleDetails(discordRoleID, roleName);
+            await updateRoleDetails(discordRoleID, roleName, roleColor);
         }
         console.log('Roles reinitialized successfully.');
     } catch (error) {

@@ -9,6 +9,10 @@ export const discordGuildRoleModel = sequelize.define('discordGuildRoles', {
     roleName: {
         type: DataTypes.STRING,
         allowNull: false,
+    },
+    roleColor: {
+        type: DataTypes.STRING,
+        allowNull: true,
     }
 }, {
     tableName: 'discordGuildRoles',

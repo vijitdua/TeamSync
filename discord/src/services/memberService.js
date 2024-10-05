@@ -29,6 +29,28 @@ export async function getUUIDByDiscordId(discordId) {
 }
 
 /**
+ * Fetches the Discord ID of a member by their UUID using the backend API.
+ *
+ * @param {string} memberUUID - The UUID of the member.
+ * @returns {Promise<string|null>} - The Discord ID of the member if found, otherwise null.
+ */
+export async function getDiscordIdByMemberUUID(memberUUID) {
+    try {
+        const response = await axios.get(`${env.backendURL}/member/${memberUUID}`);
+
+        if (response.status === 200 && response.data && response.data.data) {
+            return response.data.data.discordId || null; // Return the Discord ID
+        } else {
+            console.error(`Failed to get Discord ID for member UUID ${memberUUID}: ${response.data.message}`);
+            return null;
+        }
+    } catch (error) {
+        console.error(`Error fetching member data for UUID ${memberUUID}:`, error.message);
+        return null;
+    }
+}
+
+/**
  * Sends a POST request to the backend to create a new member.
  *
  * @param {Object} memberData - The data required to create the member.

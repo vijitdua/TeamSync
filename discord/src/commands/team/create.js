@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { createTeam } from '../../services/teamService.js';
-import { getUUIDByDiscordId} from "../../services/memberService.js";
+import { getUUIDByDiscordId } from "../../services/memberService.js";
 
 export const data = new SlashCommandBuilder()
     .setName('team-create')
@@ -16,7 +16,7 @@ export const data = new SlashCommandBuilder()
     .addUserOption(option =>
         option.setName('team-lead')
             .setDescription('The team lead (optional), this discord user must already be present in the member\'s directory')
-            .setRequired(false))
+            .setRequired(false))  // Single input for now
     .addStringOption(option =>
         option.setName('foundation-date')
             .setDescription('The foundation date of the team (optional, format: YYYY-MM-DD)')
@@ -35,42 +35,65 @@ export const data = new SlashCommandBuilder()
             .setRequired(false));
 
 export async function execute(interaction) {
-    const teamName = interaction.options.getString('name');
-    const discordRole = interaction.options.getRole('discord-role');
-    const teamLead = interaction.options.getUser('team-lead');
-    const foundationDate = interaction.options.getString('foundation-date');
-    const description = interaction.options.getString('description');
-    const customDataPublic = interaction.options.getString('custom-data-public');
-    const customDataPrivate = interaction.options.getString('custom-data-private');
+    try {
+        const teamName = interaction.options.getString('name');
+        const discordRole = interaction.options.getRole('discord-role');
+        const teamLead = interaction.options.getUser('team-lead');  // Assuming one user for now
+        const foundationDate = interaction.options.getString('foundation-date');
+        const description = interaction.options.getString('description');
+        const customDataPublic = interaction.options.getString('custom-data-public');
+        const customDataPrivate = interaction.options.getString('custom-data-private');
 
-    let teamLeadUUID = null;
-    if (teamLead) {
-        teamLeadUUID = await getUUIDByDiscordId(teamLead.id);
-    }
+        let teamLeadUUID = null;
+        let teamLeadError = null;
 
-    // Prepare the team data to send to the backend
-    const teamData = {
-        name: teamName,
-        discordId: discordRole ? discordRole.id : null,
-        teamLead: teamLeadUUID ? [teamLeadUUID] : [],
-        foundationDate: foundationDate ? new Date(foundationDate).toISOString() : null,
-        description: description || '',
-        customDataPublic: customDataPublic ? JSON.parse(customDataPublic) : {},
-        customDataPrivate: customDataPrivate ? JSON.parse(customDataPrivate) : {}
-    };
+        // Handle a single team lead for now, you can expand this to handle multiple later
+        if (teamLead) {
+            try {
+                const uuid = await getUUIDByDiscordId(teamLead.id);
+                if (!uuid) {
+                    throw new Error(`Failed to fetch UUID for team lead: ${teamLead.username} (user might not exist in the system).`);
+                }
+                teamLeadUUID = uuid;
+            } catch (error) {
+                teamLeadError = `Error fetching team lead UUID: ${teamLead.username}. ${error.message}`;
+                console.error('Error fetching team lead UUID:', error);
+            }
+        }
 
-    // Call the createTeam function to send the data
-    const response = await createTeam(teamData);
+        // Prepare the team data to send to the backend
+        const teamData = {
+            name: teamName,
+            discordId: discordRole ? discordRole.id : null,
+            teamLead: teamLeadUUID ? [teamLeadUUID] : [],
+            foundationDate: foundationDate ? new Date(foundationDate).toISOString() : null,
+            description: description || '',
+            customDataPublic: customDataPublic ? JSON.parse(customDataPublic) : {},
+            customDataPrivate: customDataPrivate ? JSON.parse(customDataPrivate) : {}
+        };
 
-    // Send feedback based on the result
-    if (response.success) {
+        // Call the createTeam function
+        const response = await createTeam(teamData);
+
+        // Send feedback based on the result
+        if (response.success) {
+            let successMessage = `Team "${teamName}" created successfully!`;
+            if (teamLeadError) {
+                successMessage += `\n${teamLeadError}`;  // Log error regarding the team lead
+            }
+
+            await interaction.reply({
+                content: successMessage,
+                ephemeral: true
+            });
+        } else {
+            throw new Error(response.message || 'Failed to create team.');
+        }
+
+    } catch (error) {
+        console.error('Error creating team:', error);
         await interaction.reply({
-            content: `Team "${teamName}" created successfully!`,
-            ephemeral: true
-        });
-    } else {
-        await interaction.reply({
-            content: `Failed to create team: ${response.message}`,
+            content: `There was an error while creating the team: ${error.message}`,
             ephemeral: true
         });
     }

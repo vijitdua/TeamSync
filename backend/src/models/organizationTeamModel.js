@@ -53,6 +53,7 @@ export const organizationTeamModel = sequelize.define("organizationTeamModel", {
 
     discordId: {
         type: DataTypes.BIGINT, // Discord ROLE ID example 1247135999168090112
+        unique: true,
         allowNull: true, // Optional field
     },
 

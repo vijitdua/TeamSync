@@ -121,6 +121,15 @@
 
 ### POST `/team`
 - **Description**: Creates a new team.
+- **Request Body Fields**
+  - `name` (string): Required. The team's name.
+  - `teamLead` (array of UUIDs): Required. The team's lead UUID(s).
+  - `foundationDate` (string): Optional. Defaults to the current date if not provided.
+  - `teamLogo` (string): Optional. A URL for the team's logo.
+  - `description` (string): Optional. The team's description.
+  - `discordId` (BIGINT): Optional. The team's Discord ID.
+  - `customDataPublic` (JSON): Optional. Custom public data for the team.
+  - `customDataPrivate` (JSON): Optional. Custom private data for the team.
 - **Request Body**:
     ```json
     {
@@ -166,6 +175,16 @@
 - **Description**: Updates an existing team.
 - **Parameters**:
     - `id` (UUID): The team's UUID.
+- **Request Body Fields**:
+  - > at-least one of these fields must be present
+  - `name` (string): Optional. The team's name.
+  - `teamLead` (array of UUIDs): Optional. The team's lead UUID(s).
+  - `foundationDate` (string): Optional. The foundation date.
+  - `teamLogo` (string): Optional. A URL for the team's logo.
+  - `description` (string): Optional. The team's description.
+  - `discordId` (BIGINT): Optional. The team's Discord ID.
+  - `customDataPublic` (JSON): Optional. Custom public data.
+  - `customDataPrivate` (JSON): Optional. Custom private data.
 - **Request Body**:
     ```json
     {
@@ -335,6 +354,18 @@
 
 ### POST `/member`
 - **Description**: Creates a new member.
+- **Request Body Fields**:
+  - `name` (string): Required. The member's name.
+  - `position` (string): Required. The member's position.
+  - `joinDate` (string): Optional. Defaults to the current date if not provided.
+  - `profilePicture` (string): Optional. A URL for the member's profile picture.
+  - `phoneNumber` (string): Optional. The member's phone number.
+  - `email` (string): Optional. The member's email.
+  - `discordId` (BIGINT): Optional. The member's Discord ID.
+  - `teams` (array of UUIDs): Optional. The teams the member belongs to.
+  - `notes` (string): Optional. Admin notes about the member.
+  - `customDataPublic` (JSON): Optional. Custom public data.
+  - `customDataPrivate` (JSON): Optional. Custom private data.
 - **Request Body**:
     ```json
     {
@@ -386,6 +417,17 @@
 - **Description**: Updates an existing member.
 - **Parameters**:
     - `id` (UUID): The member's UUID.
+- **Request Body Fields**:
+  - `name` (string): Optional. The member's name.
+  - `position` (string): Optional. The member's position.
+  - `profilePicture` (string): Optional. A URL for the member's profile picture.
+  - `phoneNumber` (string): Optional. The member's phone number.
+  - `email` (string): Optional. The member's email.
+  - `discordId` (BIGINT): Optional. The member's Discord ID.
+  - `teams` (array of UUIDs): Optional. The teams the member belongs to.
+  - `notes` (string): Optional. Admin notes about the member.
+  - `customDataPublic` (JSON): Optional. Custom public data.
+  - `customDataPrivate` (JSON): Optional. Custom private data.
 - **Request Body**:
     ```json
     {
@@ -545,6 +587,12 @@
 
 ### POST `/discord/member`
 - **Description**: Creates a new Discord member.
+- **Request Body Parameters**:
+  - `discordID` (BIGINT): Required. The member's Discord ID.
+  - `discordUsername` (string): Required. The Discord username.
+  - `discordDisplayName` (string): Optional. The member's Discord display name.
+  - `discordProfilePictureUrl` (string): Optional. A URL for the member's profile picture.
+  - `discordRoles` (array of BIGINTs): Optional. The roles assigned to the member
 - **Request Body**:
     ```json
     {
@@ -673,6 +721,10 @@
 
 ### POST `/discord/role`
 - **Description**: Creates a new Discord role.
+- **Request Body Fields**:
+  - `discordID` (BIGINT): Required. The role's Discord ID.
+  - `roleName` (string): Required. The role's name.
+  - `roleColor` (string): Optional. The role's color.
 - **Request Body**:
     ```json
     {

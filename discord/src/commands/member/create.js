@@ -1,6 +1,5 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { createMember } from '../../services/memberService.js';
-import { getUUIDByDiscordId } from '../../services/memberService.js';
 import { getTeamUUIDByDiscordRoleId } from '../../services/teamService.js';
 
 export const data = new SlashCommandBuilder()
@@ -27,8 +26,8 @@ export const data = new SlashCommandBuilder()
             .setDescription('The Discord @ of the member (optional)')
             .setRequired(false))
     .addRoleOption(option =>
-        option.setName('discord-team')
-            .setDescription('The Discord team role the member belongs to (optional)')
+        option.setName('discord-teams')
+            .setDescription('The Discord team roles (to add multiple teams, use web-client – discord doesn\'t support it)')
             .setRequired(false))
     .addStringOption(option =>
         option.setName('team-uuids')
@@ -50,7 +49,7 @@ export async function execute(interaction) {
         const email = interaction.options.getString('email');
         const phoneNumber = interaction.options.getString('phone-number');
         const discordUser = interaction.options.getUser('discord');
-        const discordTeamRole = interaction.options.getRole('discord-team');
+        const discordTeamRoles = interaction.options.getRole('discord-teams');  // Multiple Discord teams
         const teamUUIDsString = interaction.options.getString('team-uuids');
         const notes = interaction.options.getString('notes');
         const joinDate = interaction.options.getString('join-date');
@@ -58,15 +57,17 @@ export async function execute(interaction) {
         let teamUUIDs = [];
         let errors = [];
 
-        // Fetch the team UUID for the provided Discord team role if available
-        if (discordTeamRole) {
-            try {
-                const teamUUID = await getTeamUUIDByDiscordRoleId(discordTeamRole.id);
-                if (teamUUID) {
-                    teamUUIDs.push(teamUUID);
+        // Fetch UUIDs for multiple Discord team roles
+        if (discordTeamRoles) {
+            for (const role of discordTeamRoles) {
+                try {
+                    const teamUUID = await getTeamUUIDByDiscordRoleId(role.id);
+                    if (teamUUID) {
+                        teamUUIDs.push(teamUUID);
+                    }
+                } catch (error) {
+                    errors.push(`Failed to fetch team UUID for role ${role.name}`);
                 }
-            } catch (error) {
-                errors.push(`Failed to fetch team UUID for role ${discordTeamRole.name}`);
             }
         }
 
@@ -81,7 +82,7 @@ export async function execute(interaction) {
             position,
             email: email || null,
             phoneNumber: phoneNumber || null,
-            discordId: discordUser.id,
+            discordId: discordUser ? discordUser.id : null,
             teams: teamUUIDs.length > 0 ? teamUUIDs : null,
             notes: notes || '',
             joinDate: joinDate ? new Date(joinDate).toISOString() : null

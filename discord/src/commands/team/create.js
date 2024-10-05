@@ -15,7 +15,7 @@ export const data = new SlashCommandBuilder()
             .setRequired(false))
     .addUserOption(option =>
         option.setName('team-lead')
-            .setDescription('The team lead (optional), this discord user must already be present in the member\'s directory')
+            .setDescription('Team lead, user must already be present in the member\'s directory. To add multiple use web-client')
             .setRequired(false))  // Single input for now
     .addStringOption(option =>
         option.setName('foundation-date')

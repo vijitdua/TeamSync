@@ -1,6 +1,8 @@
 import ThemeWrapper from "./wrappers/ThemeWrapper";
 import AuthRedirectWrapper from "./wrappers/AuthRedirectWrapper";
 import {AuthProvider} from "./contexts/authContextProvider";
+import {DialogProvider} from "./contexts/dialogProvider";
+import {GlobalFeedbackSnackbarProvider} from "./contexts/globalFeedbackSnackbarProvider";
 
 function enabledContextsAndWrappers({children}) {
     return (
@@ -8,7 +10,11 @@ function enabledContextsAndWrappers({children}) {
             <ThemeWrapper>
                 <AuthProvider>
                     <AuthRedirectWrapper>
-                        {children}
+                        <GlobalFeedbackSnackbarProvider>
+                            <DialogProvider>
+                                {children}
+                            </DialogProvider>
+                        </GlobalFeedbackSnackbarProvider>
                     </AuthRedirectWrapper>
                 </AuthProvider>
             </ThemeWrapper>

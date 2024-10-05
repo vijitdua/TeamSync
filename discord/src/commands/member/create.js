@@ -26,7 +26,7 @@ export const data = new SlashCommandBuilder()
             .setDescription('The Discord @ of the member (optional)')
             .setRequired(false))
     .addRoleOption(option =>
-        option.setName('discord-teams')
+        option.setName('discord-team')
             .setDescription('The Discord team roles (to add multiple teams, use web-client – discord doesn\'t support it)')
             .setRequired(false))
     .addStringOption(option =>
@@ -49,7 +49,7 @@ export async function execute(interaction) {
         const email = interaction.options.getString('email');
         const phoneNumber = interaction.options.getString('phone-number');
         const discordUser = interaction.options.getUser('discord');
-        const discordTeamRoles = interaction.options.getRole('discord-teams');  // Multiple Discord teams
+        const discordTeamRole = interaction.options.getRole('discord-team'); // Single team role
         const teamUUIDsString = interaction.options.getString('team-uuids');
         const notes = interaction.options.getString('notes');
         const joinDate = interaction.options.getString('join-date');
@@ -57,17 +57,15 @@ export async function execute(interaction) {
         let teamUUIDs = [];
         let errors = [];
 
-        // Fetch UUIDs for multiple Discord team roles
-        if (discordTeamRoles) {
-            for (const role of discordTeamRoles) {
-                try {
-                    const teamUUID = await getTeamUUIDByDiscordRoleId(role.id);
-                    if (teamUUID) {
-                        teamUUIDs.push(teamUUID);
-                    }
-                } catch (error) {
-                    errors.push(`Failed to fetch team UUID for role ${role.name}`);
+        // Fetch UUID for the provided Discord team role if available
+        if (discordTeamRole) {
+            try {
+                const teamUUID = await getTeamUUIDByDiscordRoleId(discordTeamRole.id);
+                if (teamUUID) {
+                    teamUUIDs.push(teamUUID);
                 }
+            } catch (error) {
+                errors.push(`Failed to fetch team UUID for role ${discordTeamRole.name}`);
             }
         }
 

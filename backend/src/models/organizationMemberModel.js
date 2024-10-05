@@ -65,6 +65,7 @@ export const organizationMemberModel = sequelize.define('organizationMemberModel
 
     discordId: {
         type: DataTypes.BIGINT, // Discord ID's example 933604018951974924
+        unique: true,
         allowNull: true, // Optional field
     },
 

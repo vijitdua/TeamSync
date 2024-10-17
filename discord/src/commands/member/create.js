@@ -1,6 +1,7 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { createMember } from '../../services/memberService.js';
 import { getTeamUUIDByDiscordRoleId } from '../../services/teamService.js';
+import {env} from "../../config/env.js";
 
 export const data = new SlashCommandBuilder()
     .setName('member-create')
@@ -43,6 +44,14 @@ export const data = new SlashCommandBuilder()
             .setRequired(false));
 
 export async function execute(interaction) {
+    if (!interaction.member.roles.cache.has(env.discordSecureAccessRoleID)) {
+        await interaction.reply({
+            content: 'You do not have permission to use this command.',
+            ephemeral: true,
+        });
+        return;
+    }
+
     try {
         const name = interaction.options.getString('name');
         const position = interaction.options.getString('position');

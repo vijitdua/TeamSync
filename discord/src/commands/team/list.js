@@ -1,10 +1,10 @@
 import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import { getAllTeamDataList } from '../../services/teamService.js';
-import { getDiscordIdByMemberUUID } from '../../services/memberService.js';
+import {getMemberDataPrivate, getMemberDataPublic} from '../../services/memberService.js';
 
 export const data = new SlashCommandBuilder()
     .setName('team-list')
-    .setDescription('Displays a list of all teams with details using embeds.');
+    .setDescription('Displays a list of all teams with details.');
 
 export async function execute(interaction) {
     try {
@@ -17,16 +17,28 @@ export async function execute(interaction) {
 
         const teams = response.data;
 
-        // Create an array of embed objects to send
+        // Prepare embed(s)
         const embeds = [];
+        let currentEmbed = new EmbedBuilder()
+            .setTitle('Team List')
+            .setColor(0x3498db);
 
-        // Iterate over each team and build an embed for it
+        let fieldCount = 0;
+        let totalEmbedCharacters = 0;
+
         for (const team of teams) {
-            // Fetch team lead's Discord ID or display their UUID if Discord ID is unavailable
+            // Fetch team lead's data (name and Discord ID)
             const teamLeadDetails = await Promise.all(
                 team.teamLeadUUIDs.map(async (leadUUID) => {
-                    const discordId = await getDiscordIdByMemberUUID(leadUUID);
-                    return discordId ? `<@${discordId}>` : `UUID: ${leadUUID}`;
+                    const memberDataResponse = await getMemberDataPrivate(leadUUID);
+                    if (memberDataResponse.success && memberDataResponse.data) {
+                        const memberData = memberDataResponse.data;
+                        const name = memberData.name || 'Unknown Member';
+                        const discordMention = memberData.discordId ? `<@${memberData.discordId}>` : '';
+                        return discordMention ? `${name} (${discordMention})` : `${name}`;
+                    } else {
+                        return `UUID: ${leadUUID}`;
+                    }
                 })
             );
 
@@ -35,32 +47,61 @@ export async function execute(interaction) {
             // Check if the role is properly assigned
             const discordRole = team.teamDiscordRoleId ? `<@&${team.teamDiscordRoleId}>` : 'No role assigned';
 
-            // Create a new embed for the team
-            const embed = new EmbedBuilder()
-                .setTitle(team.teamName)
-                .setColor(0x3498db) // You can adjust the color
-                .setDescription(`Team UUID: \`${team.teamUUID}\``)
-                .addFields(
-                    { name: 'Discord Role', value: discordRole, inline: true },
-                    { name: 'Team Lead(s)', value: teamLeadDisplay, inline: true },
-                    { name: 'Description', value: team.description || 'No description', inline: false }
-                );
+            // Construct field value
+            const fieldValue = `**UUID:** \`${team.teamUUID}\`\n` +
+                `**Discord Role:** ${discordRole}\n` +
+                `**Team Lead(s):** ${teamLeadDisplay}\n` +
+                `**Description:** ${team.description || 'No description'}`;
 
-            // Add the embed to the list
-            embeds.push(embed);
+            // Ensure field value does not exceed 1024 characters
+            const truncatedFieldValue = fieldValue.length > 1024 ? fieldValue.substring(0, 1021) + '...' : fieldValue;
+
+            // Calculate new total characters if this field is added
+            const additionalChars = team.teamName.length + truncatedFieldValue.length;
+            if (
+                fieldCount >= 25 ||
+                totalEmbedCharacters + additionalChars > 6000
+            ) {
+                // Start a new embed
+                embeds.push(currentEmbed);
+                currentEmbed = new EmbedBuilder()
+                    .setTitle('Team List (Continued)')
+                    .setColor(0x3498db);
+                fieldCount = 0;
+                totalEmbedCharacters = 0;
+            }
+
+            // Add team info as a field
+            currentEmbed.addFields({
+                name: team.teamName,
+                value: truncatedFieldValue,
+            });
+
+            fieldCount++;
+            totalEmbedCharacters += additionalChars;
         }
 
-        // Send the embeds as a response
-        await interaction.reply({
-            embeds: embeds,
-            ephemeral: true // You can change this to false if you want it visible to all
-        });
+        // Add the last embed if it has fields
+        if (fieldCount > 0) {
+            embeds.push(currentEmbed);
+        }
+
+        // Send the embeds in batches (Discord allows up to 10 embeds per message)
+        const maxEmbedsPerMessage = 10;
+        for (let i = 0; i < embeds.length; i += maxEmbedsPerMessage) {
+            const embedsSlice = embeds.slice(i, i + maxEmbedsPerMessage);
+            if (i === 0) {
+                await interaction.reply({ embeds: embedsSlice, ephemeral: true });
+            } else {
+                await interaction.followUp({ embeds: embedsSlice, ephemeral: true });
+            }
+        }
 
     } catch (error) {
         console.error('Error fetching team list:', error);
         await interaction.reply({
             content: `There was an error fetching the team list: ${error.message}`,
-            ephemeral: true
+            ephemeral: true,
         });
     }
 }

@@ -1,7 +1,6 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { getMemberDataPrivate, getUUIDByDiscordId } from '../../services/memberService.js';
 import { getTeamPublicData } from '../../services/teamService.js';
-import { env } from '../../config/env.js';
 
 export const data = new SlashCommandBuilder()
     .setName('member-data')
@@ -20,7 +19,10 @@ export const data = new SlashCommandBuilder()
             .setRequired(false));
 
 export async function execute(interaction) {
-    const isEphemeral = !(interaction.options.getBoolean('public-visibility')) ?? false;
+    // Correctly determine if the response should be ephemeral
+    const publicVisibility = interaction.options.getBoolean('public-visibility');
+    const isEphemeral = !(publicVisibility ?? false);
+
     try {
         // Fetch input from the user
         const memberUUID = interaction.options.getString('member-uuid');
@@ -71,7 +73,10 @@ export async function execute(interaction) {
         responseMessage += `Teams: ${teamsDisplay}\n\n`;
 
         // Excluded fields
-        const excludedFields = ['id', 'name', 'discordId', 'teams', 'profilePicture', 'notes', 'updatedAt', 'deletedAt', 'createdAt'];
+        const excludedFields = ['id', 'name', 'discordId', 'teams', 'profilePicture', 'notes', 'updatedAt', 'deletedAt', 'createdAt', 'deletionDate'];
+
+        // Keys to flatten (do not include parent key as heading)
+        const keysToFlatten = ['customDataPublic', 'customDataPrivate'];
 
         // Recursive data formatting
         function formatMemberData(data) {
@@ -90,11 +95,21 @@ export async function execute(interaction) {
                                 message += `- ${item}\n`;
                             });
                         } else {
-                            message += `### ${key}\n`;
-                            recurse(value);
+                            if (keysToFlatten.includes(key)) {
+                                recurse(value);
+                            } else {
+                                message += `### ${key}\n`;
+                                recurse(value);
+                            }
                         }
                     } else {
-                        message += `### ${key}\n${value}\n`;
+                        // Format date fields
+                        if (typeof value === 'string' && Date.parse(value)) {
+                            const formattedDate = new Date(value).toDateString();
+                            message += `### ${key}\n${formattedDate}\n`;
+                        } else {
+                            message += `### ${key}\n${value}\n`;
+                        }
                     }
                 }
             }

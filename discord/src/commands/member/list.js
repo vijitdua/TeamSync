@@ -4,7 +4,7 @@ import { getTeamPublicData } from '../../services/teamService.js';
 
 export const data = new SlashCommandBuilder()
     .setName('member-list')
-    .setDescription('Displays a list of all members with details using embeds.');
+    .setDescription('Displays a list of all members with details.');
 
 export async function execute(interaction) {
     try {
@@ -17,10 +17,15 @@ export async function execute(interaction) {
 
         const members = response.data;
 
-        // Create an array of embed objects to send
+        // Prepare embed(s)
         const embeds = [];
+        let currentEmbed = new EmbedBuilder()
+            .setTitle('Member List')
+            .setColor(0x3498db);
 
-        // Iterate over each member and build an embed for it
+        let fieldCount = 0;
+        let totalEmbedCharacters = 0;
+
         for (const member of members) {
             // Fetch teams and handle unknown ones
             const teamDetails = await Promise.all(
@@ -35,40 +40,67 @@ export async function execute(interaction) {
                 })
             );
 
-            const filteredTeamDetails = teamDetails.filter(team => team !== null); // Skip unknown teams
-            const teamDisplay = filteredTeamDetails.length > 0
-                ? filteredTeamDetails.join('\n• ')
-                : 'No teams assigned';
+            const filteredTeamDetails = teamDetails.filter(team => team !== null);
+            const teamDisplay = filteredTeamDetails.length > 0 ? filteredTeamDetails.join('\n• ') : 'No teams assigned';
 
             // Create the Discord mention if available
             const discordDisplay = member.discordID ? `<@${member.discordID}>` : 'No Discord ID';
 
-            // Create a new embed for the member
-            const embed = new EmbedBuilder()
-                .setTitle(`${member.memberName}`)
-                .setColor(0x3498db) // You can adjust the color
-                .setDescription(`UUID: \`${member.UUID}\``)
-                .addFields(
-                    { name: 'Discord', value: discordDisplay, inline: true },  // Now shows Discord mention in the body
-                    { name: 'Position', value: member.position || 'No position', inline: true },
-                    { name: 'Teams', value: `• ${teamDisplay}`, inline: false }
-                );
+            // Construct field value
+            const fieldValue = `**UUID:** \`${member.UUID}\`\n` +
+                `**Discord:** ${discordDisplay}\n` +
+                `**Position:** ${member.position || 'No position'}\n` +
+                `**Teams:**\n• ${teamDisplay}`;
 
-            // Add the embed to the list
-            embeds.push(embed);
+            // Ensure field value does not exceed 1024 characters
+            const truncatedFieldValue = fieldValue.length > 1024 ? fieldValue.substring(0, 1021) + '...' : fieldValue;
+
+            // Calculate new total characters if this field is added
+            const additionalChars = member.memberName.length + truncatedFieldValue.length;
+            if (
+                fieldCount >= 25 ||
+                totalEmbedCharacters + additionalChars > 6000
+            ) {
+                // Start a new embed
+                embeds.push(currentEmbed);
+                currentEmbed = new EmbedBuilder()
+                    .setTitle('Member List (Continued)')
+                    .setColor(0x3498db);
+                fieldCount = 0;
+                totalEmbedCharacters = 0;
+            }
+
+            // Add member info as a field
+            currentEmbed.addFields({
+                name: member.memberName,
+                value: truncatedFieldValue,
+            });
+
+            fieldCount++;
+            totalEmbedCharacters += additionalChars;
         }
 
-        // Send the embeds as a response
-        await interaction.reply({
-            embeds: embeds,
-            ephemeral: true // You can change this to false if you want it visible to all
-        });
+        // Add the last embed if it has fields
+        if (fieldCount > 0) {
+            embeds.push(currentEmbed);
+        }
+
+        // Send the embeds in batches (Discord allows up to 10 embeds per message)
+        const maxEmbedsPerMessage = 10;
+        for (let i = 0; i < embeds.length; i += maxEmbedsPerMessage) {
+            const embedsSlice = embeds.slice(i, i + maxEmbedsPerMessage);
+            if (i === 0) {
+                await interaction.reply({ embeds: embedsSlice, ephemeral: true });
+            } else {
+                await interaction.followUp({ embeds: embedsSlice, ephemeral: true });
+            }
+        }
 
     } catch (error) {
         console.error('Error fetching member list:', error);
         await interaction.reply({
             content: `There was an error fetching the member list: ${error.message}`,
-            ephemeral: true
+            ephemeral: true,
         });
     }
 }

@@ -1,21 +1,12 @@
-import { Client, Events, GatewayIntentBits } from 'discord.js';
+import client from './client.js';
+import { Events } from 'discord.js';
 import { env } from './config/env.js';
 import registerCommands from './config/discordSlashCommand.js';
-import {auth} from "./services/auth.js";
-import {deleteAllMembers, reinitializeMembers} from "./services/discordMemberDirectoryService.js";
-import {deleteAllRoles, reinitializeRoles} from "./services/discordRoleDirectoryService.js";
-import {setupMemberEvents} from "./events/memberEvents.js";
-import {setupRoleEvents} from "./events/roleEvents.js"; // Import the registration script
-
-// Client configuration
-const client = new Client({
-    intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.GuildMembers,
-        GatewayIntentBits.MessageContent,
-    ],
-});
+import { auth } from './services/auth.js';
+import { deleteAllMembers, reinitializeMembers } from './services/discordMemberDirectoryService.js';
+import { deleteAllRoles, reinitializeRoles } from './services/discordRoleDirectoryService.js';
+import { setupMemberEvents } from './events/memberEvents.js';
+import { setupRoleEvents } from './events/roleEvents.js';
 
 // Client login and slash command registration
 client.once(Events.ClientReady, async (readyClient) => {
@@ -61,9 +52,15 @@ client.on(Events.InteractionCreate, async (interaction) => {
     } catch (error) {
         console.error(error);
         if (interaction.replied || interaction.deferred) {
-            await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
+            await interaction.followUp({
+                content: 'There was an error while executing this command!',
+                ephemeral: true,
+            });
         } else {
-            await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+            await interaction.reply({
+                content: 'There was an error while executing this command!',
+                ephemeral: true,
+            });
         }
     }
 });

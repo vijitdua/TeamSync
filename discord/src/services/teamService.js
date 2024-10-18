@@ -1,6 +1,10 @@
-import axios from "axios";
-import {sessionCookie} from "./auth.js";
-import {env} from "../config/env.js";
+// services/teamService.js
+
+import axios from 'axios';
+import { env } from '../config/env.js';
+import { sessionCookie } from './auth.js';
+
+
 
 /**
  * Sends a POST request to the backend to create a new team.
@@ -197,73 +201,71 @@ export async function getTeamPublicData(teamUUID) {
  * Sends a GET request to retrieve private data of a team by UUID.
  *
  * @param {string} teamUUID - The UUID of the team to retrieve.
+ * @param {string} [sessionId] - Optional. The session ID for authentication.
  * @returns {Promise<Object>} - Returns an object containing the success state and the team's private data.
- *    - {boolean} success - True if the request was successful, false otherwise.
- *    - {Object} [data] - Contains the private team data on success.
- *    - {string} [message] - Error message in case of failure.
  */
-export async function getTeamPrivateData(teamUUID) {
+export async function getTeamPrivateData(teamUUID, sessionId) {
     try {
+        const cookieHeader = sessionId ? `sessionId=${sessionId}` : sessionCookie;
         const response = await axios.get(`${env.backendURL}/team/${teamUUID}`, {
             headers: {
-                Cookie: sessionCookie // Pass the session cookie for authentication
-            }
+                Cookie: cookieHeader,
+            },
         });
 
         if (response.status === 200) {
             return {
                 success: true,
-                data: response.data.data
+                data: response.data.data,
             };
         } else {
             return {
                 success: false,
-                message: response.data.message || 'Failed to fetch private team data.'
+                message: response.data.message || 'Failed to fetch private team data.',
             };
         }
     } catch (error) {
         return {
             success: false,
-            message: error.message || 'An error occurred while fetching private team data.'
+            message: error.message || 'An error occurred while fetching private team data.',
         };
     }
 }
-
 
 /**
  * Sends a GET request to retrieve a list of all team UUIDs, including deleted ones.
  *
  * @returns {Promise<Object>} - Returns an object containing the success state and the list of team UUIDs.
- *    - {boolean} success - True if the request was successful, false otherwise.
- *    - {Array<string>} [data] - Contains an array of team UUIDs on success.
- *    - {string} [message] - Error message in case of failure.
  */
 export async function getTeamUUIDList() {
     try {
-        const response = await axios.get(`${env.backendURL}/team`);
+        const response = await axios.get(`${env.backendURL}/team`, {
+            headers: {
+                Cookie: sessionCookie, // Use the session cookie from auth.js
+            },
+        });
 
         if (response.status === 200) {
             return {
                 success: true,
-                data: response.data.data
+                data: response.data.data,
             };
         } else {
             return {
                 success: false,
-                message: response.data.message || 'Failed to fetch team UUID list.'
+                message: response.data.message || 'Failed to fetch team UUID list.',
             };
         }
     } catch (error) {
         return {
             success: false,
-            message: error.message || 'An error occurred while fetching the team UUID list.'
+            message: error.message || 'An error occurred while fetching the team UUID list.',
         };
     }
 }
 
 /**
- * Combines data from existing functions to return a specific subset of team data:
- * teamUUID, teamName, teamDiscordRoleId, teamLeadUUID, and description.
+ * Combines data from existing functions to return a specific subset of team data.
  *
  * @returns {Promise<Object>} - Returns an object containing the success state and the list of team data.
  *    - {boolean} success - True if the request was successful, false otherwise.
@@ -275,43 +277,47 @@ export async function getAllTeamDataList() {
         const teamsResponse = await getTeamUUIDList();
 
         if (teamsResponse.success) {
-            const teamDataList = await Promise.all(teamsResponse.data.map(async (teamUUID) => {
-                const teamDataResponse = await getTeamPublicData(teamUUID);
+            const teamDataList = await Promise.all(
+                teamsResponse.data.map(async (teamUUID) => {
+                    const teamDataResponse = await getTeamPublicData(teamUUID);
 
-                if (teamDataResponse.success) {
-                    const teamData = teamDataResponse.data;
+                    if (teamDataResponse.success) {
+                        const teamData = teamDataResponse.data;
 
-                    return {
-                        teamUUID: teamData.id,
-                        teamName: teamData.name,
-                        teamDiscordRoleId: teamData.discordId,
-                        teamLeadUUIDs: teamData.teamLead,
-                        description: teamData.description
-                    };
-                }
-                return null; // Return null if fetching this team's data fails
-            }));
+                        return {
+                            teamUUID: teamData.id,
+                            teamName: teamData.name,
+                            teamDiscordRoleId: teamData.discordId,
+                            teamLeadUUIDs: teamData.teamLead,
+                            description: teamData.description,
+                        };
+                    }
+                    return null; // Return null if fetching this team's data fails
+                })
+            );
 
             // Filter out any null results from failed requests
-            const validTeamData = teamDataList.filter(team => team !== null);
+            const validTeamData = teamDataList.filter((team) => team !== null);
 
             // Sort by team name (case-insensitive)
-            validTeamData.sort((a, b) => a.teamName.toLowerCase().localeCompare(b.teamName.toLowerCase()));
+            validTeamData.sort((a, b) =>
+                a.teamName.toLowerCase().localeCompare(b.teamName.toLowerCase())
+            );
 
             return {
                 success: true,
-                data: validTeamData
+                data: validTeamData,
             };
         } else {
             return {
                 success: false,
-                message: teamsResponse.message || 'Failed to fetch team UUID list.'
+                message: teamsResponse.message || 'Failed to fetch team UUID list.',
             };
         }
     } catch (error) {
         return {
             success: false,
-            message: error.message || 'An error occurred while fetching the team data list.'
+            message: error.message || 'An error occurred while fetching the team data list.',
         };
     }
 }

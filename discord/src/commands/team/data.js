@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { getTeamPrivateData, getTeamUUIDByDiscordRoleId } from '../../services/teamService.js';
-import { getDiscordIdByMemberUUID } from '../../services/memberService.js';
+import {getDiscordIdByMemberUUID, getMemberDataPrivate} from '../../services/memberService.js';
 
 export const data = new SlashCommandBuilder()
     .setName('team-data')
@@ -54,15 +54,23 @@ export async function execute(interaction) {
 
         const teamData = response.data;
 
-        // Fetch team lead details
-        const teamLeadMentions = await Promise.all(
+        // Fetch team lead's data (name and Discord ID)
+        const teamLeadDetails = await Promise.all(
             teamData.teamLead.map(async (leadUUID) => {
-                const discordId = await getDiscordIdByMemberUUID(leadUUID);
-                return discordId ? `<@${discordId}>` : `UUID: ${leadUUID}`;
+                const memberDataResponse = await getMemberDataPrivate(leadUUID);
+                if (memberDataResponse.success && memberDataResponse.data) {
+                    const memberData = memberDataResponse.data;
+                    const name = memberData.name || 'Unknown Member';
+                    const discordMention = memberData.discordId ? `<@${memberData.discordId}>` : '';
+                    return discordMention ? `${name} (${discordMention})` : `${name}`;
+                } else {
+                    return `UUID: ${leadUUID}`;
+                }
             })
         );
 
-        const teamLeadDisplay = teamLeadMentions.length > 0 ? teamLeadMentions.join(', ') : 'No team lead found';
+        const teamLeadDisplay = teamLeadDetails.length > 0 ? teamLeadDetails.join(', ') : 'No team lead found';
+
         const discordRoleMention = teamData.discordId ? `<@&${teamData.discordId}>` : '– No Discord role';
 
         // Construct response message

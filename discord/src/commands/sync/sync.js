@@ -1,5 +1,3 @@
-// commands/utilities/sync.js
-
 import { SlashCommandBuilder } from 'discord.js';
 import {
     syncMemberDiscordTeamsByRolesToDatabase,
@@ -71,7 +69,7 @@ export async function execute(interaction) {
 
     let discordMemberId;
 
-    // Ensure either 'user' or 'uuid' is provided
+    // Determine the target member
     if (targetUser) {
         discordMemberId = targetUser.id;
     } else if (memberUUID) {
@@ -125,9 +123,17 @@ export async function execute(interaction) {
         }
     } catch (error) {
         console.error(`Error executing sync command: ${error.message}`);
-        await interaction.reply({
-            content: `There was an error during synchronization: ${error.message}`,
-            ephemeral: true,
-        });
+        // Check if the interaction has already been replied to
+        if (interaction.replied || interaction.deferred) {
+            await interaction.followUp({
+                content: `There was an error during synchronization: ${error.message}`,
+                ephemeral: true,
+            });
+        } else {
+            await interaction.reply({
+                content: `There was an error during synchronization: ${error.message}`,
+                ephemeral: true,
+            });
+        }
     }
 }

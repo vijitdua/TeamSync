@@ -29,6 +29,7 @@ export async function addRoleToMember(discordMemberId, discordRoleId) {
         console.log(`Added role ${discordRoleId} to member ${discordMemberId}.`);
     } catch (error) {
         console.error(`Error adding role to member: ${error.message}`);
+        throw error; // Rethrow the error
     }
 }
 
@@ -52,6 +53,7 @@ export async function removeRoleFromMember(discordMemberId, discordRoleId) {
         console.log(`Removed role ${discordRoleId} from member ${discordMemberId}.`);
     } catch (error) {
         console.error(`Error removing role from member: ${error.message}`);
+        throw error; // Rethrow the error
     }
 }
 
@@ -107,7 +109,7 @@ export async function getMemberDiscordRolesByBackendTeams(
         return result;
     } catch (error) {
         console.error(`Error in getMemberDiscordRolesByBackendTeams: ${error.message}`);
-        return [];
+        throw error; // Rethrow the error
     }
 }
 
@@ -146,7 +148,7 @@ export async function getMemberBackendTeamsByDiscordRoles(discordMemberId) {
         return result;
     } catch (error) {
         console.error(`Error in getMemberBackendTeamsByDiscordRoles: ${error.message}`);
-        return [];
+        throw error; // Rethrow the error
     }
 }
 
@@ -205,6 +207,7 @@ export async function syncMemberDiscordTeamsByRolesToDatabase(
         console.log(`Member ${memberUUID} teams updated successfully in backend.`);
     } catch (error) {
         console.error(`Error in syncMemberDiscordTeamsByRolesToDatabase: ${error.message}`);
+        throw error; // Rethrow the error
     }
 }
 
@@ -240,6 +243,13 @@ export async function syncMemberTeamsByDatabaseToDiscordRoles(
 
         const currentRoleIds = member.roles.cache.map((role) => role.id);
 
+        guild.roles.cache.forEach(role => {
+            console.log(`Role Name: ${role.name}, Role ID: ${role.id}`);
+        });
+
+        console.log(`Current Roles of Member ${discordMemberId}:`, currentRoleIds);
+        console.log(`Roles from Backend for Member ${discordMemberId}:`, roleIdsFromTeams);
+
         if (overwrite) {
             // Remove roles that are not in roleIdsFromTeams
             const rolesToRemove = currentRoleIds.filter(
@@ -268,6 +278,7 @@ export async function syncMemberTeamsByDatabaseToDiscordRoles(
         console.log(`Member ${discordMemberId} roles updated successfully in Discord.`);
     } catch (error) {
         console.error(`Error in syncMemberTeamsByDatabaseToDiscordRoles: ${error.message}`);
+        throw error; // Rethrow the error
     }
 }
 
@@ -293,5 +304,6 @@ export async function syncMemberDiscordToBackendAndBackendToDiscord(
         console.error(
             `Error in syncMemberDiscordToBackendAndBackendToDiscord: ${error.message}`
         );
+        throw error; // Rethrow the error
     }
 }

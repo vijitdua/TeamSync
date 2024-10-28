@@ -2,6 +2,7 @@ import readline from 'readline';
 import bcrypt from 'bcryptjs';
 import { authUserModel } from './src/models/authUserModel.js';
 import { sequelize } from './src/config/database.js';
+import {registerNewUser} from "./src/services/authService.js";
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -11,22 +12,6 @@ const rl = readline.createInterface({
 const askQuestion = (question) => {
     return new Promise((resolve) => rl.question(question, resolve));
 };
-
-// Standalone function to handle user registration
-async function registerNewUser(username, password) {
-    try {
-        const existingUser = await authUserModel.findOne({ where: { username } });
-        if (existingUser) {
-            return { success: false, message: 'Username already taken.' };
-        }
-
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = await authUserModel.create({ username, password: hashedPassword });
-        return { success: true, user: newUser };
-    } catch (error) {
-        throw new Error(`User registration failed: ${error.message}`);
-    }
-}
 
 (async () => {
     try {

@@ -10,54 +10,6 @@ import {
 } from './teamService.js';
 
 /**
- * Adds a Discord role to a member.
- * @param {string} discordMemberId - The Discord ID of the member.
- * @param {string} discordRoleId - The Discord ID of the role to add.
- * @returns {Promise<void>}
- */
-export async function addRoleToMember(discordMemberId, discordRoleId) {
-    try {
-        const guild = client.guilds.cache.first();
-        if (!guild) {
-            throw new Error('No guild found.');
-        }
-        const member = await guild.members.fetch(discordMemberId);
-        if (!member) {
-            throw new Error(`Member with ID ${discordMemberId} not found.`);
-        }
-        await member.roles.add(discordRoleId);
-        console.log(`Added role ${discordRoleId} to member ${discordMemberId}.`);
-    } catch (error) {
-        console.error(`Error adding role to member: ${error.message}`);
-        throw error; // Rethrow the error
-    }
-}
-
-/**
- * Removes a Discord role from a member.
- * @param {string} discordMemberId - The Discord ID of the member.
- * @param {string} discordRoleId - The Discord ID of the role to remove.
- * @returns {Promise<void>}
- */
-export async function removeRoleFromMember(discordMemberId, discordRoleId) {
-    try {
-        const guild = client.guilds.cache.first();
-        if (!guild) {
-            throw new Error('No guild found.');
-        }
-        const member = await guild.members.fetch(discordMemberId);
-        if (!member) {
-            throw new Error(`Member with ID ${discordMemberId} not found.`);
-        }
-        await member.roles.remove(discordRoleId);
-        console.log(`Removed role ${discordRoleId} from member ${discordMemberId}.`);
-    } catch (error) {
-        console.error(`Error removing role from member: ${error.message}`);
-        throw error; // Rethrow the error
-    }
-}
-
-/**
  * Gets a member's Discord roles based on the teams they belong to in the backend.
  * @param {string} discordMemberId - The Discord ID of the member.
  * @param {string} [sessionId] - Optional. The session ID for authentication.
@@ -234,6 +186,9 @@ export async function syncMemberTeamsByDatabaseToDiscordRoles(
             throw new Error(`Member with ID ${discordMemberId} not found.`);
         }
 
+        // Refresh role cache
+        await guild.roles.fetch();
+
         // Get member's Discord roles based on their backend teams
         const memberDiscordRolesByTeams = await getMemberDiscordRolesByBackendTeams(
             discordMemberId,
@@ -243,35 +198,67 @@ export async function syncMemberTeamsByDatabaseToDiscordRoles(
 
         const currentRoleIds = member.roles.cache.map((role) => role.id);
 
-        guild.roles.cache.forEach(role => {
-            console.log(`Role Name: ${role.name}, Role ID: ${role.id}`);
-        });
-
         console.log(`Current Roles of Member ${discordMemberId}:`, currentRoleIds);
         console.log(`Roles from Backend for Member ${discordMemberId}:`, roleIdsFromTeams);
 
+        // Get the bot's highest role position
+        const botRolePosition = guild.members.me.roles.highest.position;
+
+        // Validate roles from backend
+        const validRoleIdsFromTeams = roleIdsFromTeams.filter((roleId) => {
+            const role = guild.roles.cache.get(roleId);
+            if (!role) {
+                console.warn(`Role with ID ${roleId} does not exist in the guild. Skipping.`);
+                return false;
+            }
+            if (role.position >= botRolePosition) {
+                console.warn(
+                    `Cannot manage role ${role.name} (ID: ${roleId}) due to role hierarchy. Skipping.`
+                );
+                return false;
+            }
+            return true;
+        });
+
         if (overwrite) {
-            // Remove roles that are not in roleIdsFromTeams
+            // Remove roles not in validRoleIdsFromTeams
             const rolesToRemove = currentRoleIds.filter(
-                (roleId) => !roleIdsFromTeams.includes(roleId)
+                (roleId) => !validRoleIdsFromTeams.includes(roleId)
             );
             for (const roleId of rolesToRemove) {
-                await member.roles.remove(roleId);
+                try {
+                    const role = guild.roles.cache.get(roleId);
+                    if (!role || role.position >= botRolePosition) continue;
+                    await member.roles.remove(roleId);
+                    console.log(`Removed role ${roleId} from member ${discordMemberId}.`);
+                } catch (error) {
+                    console.error(`Failed to remove role ${roleId}: ${error.message}`);
+                }
             }
-            // Add roles that are in roleIdsFromTeams but not in currentRoleIds
-            const rolesToAdd = roleIdsFromTeams.filter(
+            // Add roles that are in validRoleIdsFromTeams but not in currentRoleIds
+            const rolesToAdd = validRoleIdsFromTeams.filter(
                 (roleId) => !currentRoleIds.includes(roleId)
             );
             for (const roleId of rolesToAdd) {
-                await member.roles.add(roleId);
+                try {
+                    await member.roles.add(roleId);
+                    console.log(`Added role ${roleId} to member ${discordMemberId}.`);
+                } catch (error) {
+                    console.error(`Failed to add role ${roleId}: ${error.message}`);
+                }
             }
         } else {
             // Just add roles from backend teams
-            const rolesToAdd = roleIdsFromTeams.filter(
+            const rolesToAdd = validRoleIdsFromTeams.filter(
                 (roleId) => !currentRoleIds.includes(roleId)
             );
             for (const roleId of rolesToAdd) {
-                await member.roles.add(roleId);
+                try {
+                    await member.roles.add(roleId);
+                    console.log(`Added role ${roleId} to member ${discordMemberId}.`);
+                } catch (error) {
+                    console.error(`Failed to add role ${roleId}: ${error.message}`);
+                }
             }
         }
 
@@ -281,6 +268,7 @@ export async function syncMemberTeamsByDatabaseToDiscordRoles(
         throw error; // Rethrow the error
     }
 }
+
 
 /**
  * Syncs a member's teams between Discord and backend in both directions.

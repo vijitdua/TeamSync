@@ -1,3 +1,5 @@
+import express from 'express';
+import cookieParser from 'cookie-parser';
 import client from './client.js';
 import { Events } from 'discord.js';
 import { env } from './config/env.js';
@@ -7,6 +9,15 @@ import { deleteAllMembers, reinitializeMembers } from './services/discordMemberD
 import { deleteAllRoles, reinitializeRoles } from './services/discordRoleDirectoryService.js';
 import { setupMemberEvents } from './events/memberEvents.js';
 import { setupRoleEvents } from './events/roleEvents.js';
+import syncUserRouter from './server.js'; // Adjust the path as needed
+
+// Initialize Express app
+const app = express();
+app.use(express.json());
+app.use(cookieParser());
+
+// Use the sync-user API
+app.use(syncUserRouter);
 
 // Client login and slash command registration
 client.once(Events.ClientReady, async (readyClient) => {
@@ -67,5 +78,11 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
 // Start client
 client.login(env.discordBotToken);
+
+// Start the Express server
+const PORT = env.port || 3000;
+app.listen(PORT, () => {
+    console.log(`Express server running on port ${PORT}`);
+});
 
 export default client;

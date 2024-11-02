@@ -1,6 +1,7 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { getTeamPrivateData, getTeamUUIDByDiscordRoleId } from '../../services/teamService.js';
-import {getDiscordIdByMemberUUID, getMemberDataPrivate} from '../../services/memberService.js';
+import { getDiscordIdByMemberUUID, getMemberDataPrivate } from '../../services/memberService.js';
+import {getFinalKeyValuePairs} from "../../utils/objectFlatten.js";
 
 export const data = new SlashCommandBuilder()
     .setName('team-data')
@@ -81,50 +82,8 @@ export async function execute(interaction) {
         // Excluded fields
         const excludedFields = ['id', 'name', 'discordId', 'teamLead', 'updatedAt', 'deletedAt', 'createdAt', 'deletionDate'];
 
-        // Keys to flatten (do not include parent key as heading)
-        const keysToFlatten = ['customDataPublic', 'customDataPrivate'];
-
-        // Recursive data formatting
-        function formatTeamData(data) {
-            let message = '';
-
-            function recurse(obj) {
-                for (const key in obj) {
-                    if (excludedFields.includes(key)) continue;
-
-                    const value = obj[key];
-
-                    if (typeof value === 'object' && value !== null) {
-                        if (Array.isArray(value)) {
-                            message += `### ${key}\n`;
-                            value.forEach((item) => {
-                                message += `- ${item}\n`;
-                            });
-                        } else {
-                            if (keysToFlatten.includes(key)) {
-                                recurse(value);
-                            } else {
-                                message += `### ${key}\n`;
-                                recurse(value);
-                            }
-                        }
-                    } else {
-                        // Format date fields
-                        if (typeof value === 'string' && Date.parse(value)) {
-                            const formattedDate = new Date(value).toDateString();
-                            message += `### ${key}\n${formattedDate}\n`;
-                        } else {
-                            message += `### ${key}\n${value}\n`;
-                        }
-                    }
-                }
-            }
-
-            recurse(data);
-            return message;
-        }
-
-        responseMessage += formatTeamData(teamData);
+        // Append formatted team data
+        responseMessage += getFinalKeyValuePairs(teamData, excludedFields);
 
         // Reply with the response
         await interaction.reply({

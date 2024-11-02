@@ -1,6 +1,8 @@
-import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
+// commands/team/list-members.js
+
+import { SlashCommandBuilder } from 'discord.js';
 import { getTeamPrivateData, getTeamUUIDByDiscordRoleId } from '../../services/teamService.js';
-import {getAllMemberDataList, getMemberDataPrivate} from '../../services/memberService.js';
+import { getMemberDataPrivate, getAllMemberDataList } from '../../services/memberService.js';
 
 export const data = new SlashCommandBuilder()
     .setName('team-list-members')
@@ -54,15 +56,20 @@ export async function execute(interaction) {
 
         // Fetch all member data
         const allMembersResponse = await getAllMemberDataList();
-        console.log(allMembersResponse);
         if (!allMembersResponse.success) {
             throw new Error(allMembersResponse.message || 'Failed to fetch member data.');
         }
 
         const allMembers = allMembersResponse.data;
 
+        // Debugging Logs (Optional)
+        console.log(`Total members fetched: ${allMembers.length}`);
+        allMembers.forEach(member => {
+            console.log(`Member UUID: ${member.UUID}, Teams: ${member.teamsUUID}`);
+        });
+
         // Filter members who belong to the specified team
-        const teamMembers = allMembers.filter(member => member.teamsUUID.includes(finalTeamUUID));
+        const teamMembers = allMembers.filter(member => Array.isArray(member.teamsUUID) && member.teamsUUID.includes(finalTeamUUID));
 
         // Fetch detailed data for each member
         const detailedMembers = await Promise.all(teamMembers.map(async (member) => {
@@ -86,10 +93,13 @@ export async function execute(interaction) {
             const memberDiscordID = member.discordId ? `<@${member.discordId}>` : '@unknown';
             const memberUUID = member.id || 'N/A';
 
+            // Safely check if teamsUUID exists and includes the teamUUID
+            const hasTeam = Array.isArray(member.teamsUUID) && member.teamsUUID.includes(finalTeamUUID);
+
             // Fetch the member's roles in the context of this team
             // Assuming that the team role corresponds to the Discord role
             // Alternatively, if there are multiple roles, adjust accordingly
-            const memberRoles = member.teamsUUID.includes(finalTeamUUID) ?
+            const memberRoles = hasTeam ?
                 (teamDiscordRoleId ? `<@&${teamDiscordRoleId}>` : 'No specific role') :
                 'No specific role';
 

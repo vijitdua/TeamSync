@@ -27,6 +27,11 @@
 - > **Important**: This route is **disabled by default** and must be enabled manually in the code. To register users without the API, you must SSH into the backend and run the `backend/registerUser.js` file manually.
 - **Cookies Sent**: None.
 
+### GET `/auth/check`
+
+auth: true if cookies say authenticated
+auth: false if cookies contain invalid / no auth data
+
 ---
 
 # Team Routes (`/team`)

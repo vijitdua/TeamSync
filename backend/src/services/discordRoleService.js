@@ -15,7 +15,7 @@ export async function getRoleByID(discordRoleID) {
 
 // Delete a specific role by ID
 export async function deleteRoleByID(discordRoleID) {
-    return await discordGuildRoleModel.destroy({ where: { discordRoleID } });
+    return await discordGuildRoleModel.destroy({ where: { discordID: discordRoleID } });
 }
 
 // Delete all roles

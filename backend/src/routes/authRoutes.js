@@ -6,6 +6,6 @@ const router = Router();
 
 router.post('/login', authRateLimit, loginController);
 router.post('/signup', authRateLimit, signupController);
-router.get('/check', authRateLimit, isAuthenticatedController);
+router.get('/check', isAuthenticatedController);
 
 export default router;

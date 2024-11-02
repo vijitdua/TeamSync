@@ -14,6 +14,24 @@ async function updateMemberDetails(discordID, discordUsername, discordDisplayNam
             discordRoles
         };
 
+        // Check if member exists
+        const getResponse = await axios.get(`${env.backendURL}/discord/member/${discordID}`).catch(error => {
+            if (error.response && error.response.status !== 404) {
+                // console.error(`Failed to get member ${discordID}:`, error.message);
+            }
+        });
+
+        // If member exists, delete it
+        if (getResponse && getResponse.status === 200 && getResponse.data.success) {
+            await axios.delete(`${env.backendURL}/discord/member/${discordID}`, {
+                headers: {
+                    Cookie: sessionCookie
+                }
+            }).catch(error => {
+                console.error(`Failed to delete member ${discordID}:`, error.message);
+            });
+        }
+
         const response = await axios.post(`${env.backendURL}/discord/member`, memberData, {
             headers: {
                 Cookie: sessionCookie // Use session cookie from auth.js

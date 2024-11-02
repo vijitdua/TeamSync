@@ -1,139 +1,130 @@
+// commands/sync/sync-member.js
+
 import { SlashCommandBuilder } from 'discord.js';
 import {
-    syncMemberDiscordTeamsByRolesToDatabase,
-    syncMemberTeamsByDatabaseToDiscordRoles,
-    syncMemberDiscordToBackendAndBackendToDiscord,
+    syncDiscordToBackend,
+    syncBackendToDiscord,
+    syncBothWays
 } from '../../services/syncService.js';
-import { env } from '../../config/env.js';
-import { getDiscordIdByMemberUUID } from '../../services/memberService.js';
+import { getUUIDByDiscordId, getDiscordIdByMemberUUID } from '../../services/memberService.js';
 
 export const data = new SlashCommandBuilder()
-    .setName('sync')
-    .setDescription('Synchronize member data between Discord and backend.')
-    .addSubcommand((subcommand) =>
-        subcommand
-            .setName('discord-to-backend')
-            .setDescription('Sync data from Discord to backend.')
-            .addUserOption((option) =>
-                option
-                    .setName('user')
-                    .setDescription('The Discord user to sync.')
-                    .setRequired(false)
-            )
-            .addStringOption((option) =>
-                option
-                    .setName('uuid')
-                    .setDescription('The UUID of the member to sync.')
-                    .setRequired(false)
-            )
-    )
-    .addSubcommand((subcommand) =>
-        subcommand
-            .setName('backend-to-discord')
-            .setDescription('Sync data from backend to Discord.')
-            .addUserOption((option) =>
-                option
-                    .setName('user')
-                    .setDescription('The Discord user to sync.')
-                    .setRequired(false)
-            )
-            .addStringOption((option) =>
-                option
-                    .setName('uuid')
-                    .setDescription('The UUID of the member to sync.')
-                    .setRequired(false)
-            )
-    )
-    .addSubcommand((subcommand) =>
-        subcommand
-            .setName('both')
-            .setDescription('Sync data both ways.')
-            .addUserOption((option) =>
-                option
-                    .setName('user')
-                    .setDescription('The Discord user to sync.')
-                    .setRequired(false)
-            )
-            .addStringOption((option) =>
-                option
-                    .setName('uuid')
-                    .setDescription('The UUID of the member to sync.')
-                    .setRequired(false)
-            )
-    );
+    .setName('sync-member')
+    .setDescription('Synchronizes a member\'s roles and teams between Discord and the backend.')
+    .addStringOption(option =>
+        option.setName('sync-type')
+            .setDescription('Type of synchronization to perform.')
+            .setRequired(true)
+            .addChoices(
+                { name: 'Discord to Backend', value: 'discord-to-backend' },
+                { name: 'Backend to Discord', value: 'backend-to-discord' },
+                { name: 'Both', value: 'both' },
+            ))
+    .addUserOption(option =>
+        option.setName('discord-user')
+            .setDescription('The Discord @ of the member to synchronize.')
+            .setRequired(false))
+    .addStringOption(option =>
+        option.setName('member-uuid')
+            .setDescription('The UUID of the member to synchronize.')
+            .setRequired(false));
 
 export async function execute(interaction) {
-    const subcommand = interaction.options.getSubcommand();
-    const targetUser = interaction.options.getUser('user');
-    const memberUUID = interaction.options.getString('uuid');
+    const syncType = interaction.options.getString('sync-type');
+    const discordUser = interaction.options.getUser('discord-user');
+    const memberUUID = interaction.options.getString('member-uuid');
 
-    let discordMemberId;
-
-    // Determine the target member
-    if (targetUser) {
-        discordMemberId = targetUser.id;
-    } else if (memberUUID) {
-        // Fetch Discord ID using the provided UUID
-        discordMemberId = await getDiscordIdByMemberUUID(memberUUID);
-        if (!discordMemberId) {
-            await interaction.reply({
-                content: `Could not find a Discord user associated with UUID ${memberUUID}.`,
-                ephemeral: true,
-            });
-            return;
-        }
-    } else {
-        // If neither 'user' nor 'uuid' is provided, default to the command invoker
-        discordMemberId = interaction.member.id;
-    }
-
-    // Permissions check: Ensure the user has the required role or permissions
-    if (!interaction.member.permissions.has('Administrator')) {
+    // Ensure at least one identifier is provided
+    if (!discordUser && !memberUUID) {
         await interaction.reply({
-            content: 'You do not have permission to use this command.',
+            content: 'Please provide either a Discord user or a member UUID to synchronize.',
             ephemeral: true,
         });
         return;
     }
 
+    let targetDiscordId = null;
+    let targetMemberUUID = null;
+
+    // Resolve identifiers
     try {
-        if (subcommand === 'discord-to-backend') {
-            await syncMemberDiscordTeamsByRolesToDatabase(discordMemberId);
-            await interaction.reply({
-                content: `Synchronization from Discord to backend completed for user <@${discordMemberId}>.`,
-                ephemeral: true,
-            });
-        } else if (subcommand === 'backend-to-discord') {
-            await syncMemberTeamsByDatabaseToDiscordRoles(discordMemberId);
-            await interaction.reply({
-                content: `Synchronization from backend to Discord completed for user <@${discordMemberId}>.`,
-                ephemeral: true,
-            });
-        } else if (subcommand === 'both') {
-            await syncMemberDiscordToBackendAndBackendToDiscord(discordMemberId);
-            await interaction.reply({
-                content: `Synchronization between Discord and backend completed for user <@${discordMemberId}>.`,
-                ephemeral: true,
-            });
-        } else {
-            await interaction.reply({
-                content: 'Unknown subcommand.',
-                ephemeral: true,
-            });
+        if (discordUser) {
+            targetDiscordId = discordUser.id;
+            // If memberUUID is also provided, verify consistency
+            if (memberUUID) {
+                const resolvedUUID = await getUUIDByDiscordId(targetDiscordId);
+                if (resolvedUUID !== memberUUID) {
+                    await interaction.reply({
+                        content: 'The provided Discord user and member UUID do not match.',
+                        ephemeral: true,
+                    });
+                    return;
+                }
+                targetMemberUUID = memberUUID;
+            } else {
+                targetMemberUUID = await getUUIDByDiscordId(targetDiscordId);
+                if (!targetMemberUUID) {
+                    await interaction.reply({
+                        content: 'Could not find a member UUID associated with the provided Discord user.',
+                        ephemeral: true,
+                    });
+                    return;
+                }
+            }
+        } else if (memberUUID) {
+            targetMemberUUID = memberUUID;
+            targetDiscordId = await getDiscordIdByMemberUUID(targetMemberUUID);
+            if (!targetDiscordId) {
+                await interaction.reply({
+                    content: 'Could not find a Discord user associated with the provided member UUID.',
+                    ephemeral: true,
+                });
+                return;
+            }
         }
     } catch (error) {
-        console.error(`Error executing sync command: ${error.message}`);
-        // Check if the interaction has already been replied to
-        if (interaction.replied || interaction.deferred) {
-            await interaction.followUp({
-                content: `There was an error during synchronization: ${error.message}`,
-                ephemeral: true,
-            });
-        } else {
-            await interaction.reply({
-                content: `There was an error during synchronization: ${error.message}`,
-                ephemeral: true,
-            });
+        console.error('Error resolving member identifiers:', error);
+        await interaction.reply({
+            content: 'An error occurred while resolving member identifiers.',
+            ephemeral: true,
+        });
+        return;
+    }
+
+    // Proceed with synchronization based on syncType
+    try {
+        switch (syncType) {
+            case 'discord-to-backend':
+                await syncDiscordToBackend(targetDiscordId, targetMemberUUID);
+                break;
+            case 'backend-to-discord':
+                await syncBackendToDiscord(targetDiscordId, targetMemberUUID);
+                break;
+            case 'both':
+                await syncBothWays(targetDiscordId, targetMemberUUID);
+                break;
+            default:
+                await interaction.reply({
+                    content: 'Invalid sync type selected.',
+                    ephemeral: true,
+                });
+                return;
         }
+
+        await interaction.reply({
+            content: `Synchronization (${syncType}) completed successfully for member <@${targetDiscordId}> (UUID: ${targetMemberUUID}).`,
+            ephemeral: false,
+        });
+    } catch (error) {
+        console.error(`Error during synchronization (${syncType}):`, error);
+        await interaction.reply({
+            content: `An error occurred during synchronization: ${error.message}`,
+            ephemeral: true,
+        });
     }
 }
+
+export default {
+    data,
+    execute,
+};

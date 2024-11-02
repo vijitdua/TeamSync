@@ -4,9 +4,17 @@ import { getTeamPublicData } from '../../services/teamService.js';
 
 export const data = new SlashCommandBuilder()
     .setName('member-list')
-    .setDescription('Displays a list of all members with details.');
+    .setDescription('Displays a list of all members with details.')
+    .addBooleanOption(option =>
+        option.setName('public-visibility')
+            .setDescription('Whether the response should be pasted in the channel (true), or visible only to you (default: false)')
+            .setRequired(false));
 
 export async function execute(interaction) {
+    // Correctly determine if the response should be ephemeral
+    const publicVisibility = interaction.options.getBoolean('public-visibility');
+    const isEphemeral = !(publicVisibility ?? false);
+
     try {
         // Fetch all members' data
         const response = await getAllMemberDataList();
@@ -90,9 +98,9 @@ export async function execute(interaction) {
         for (let i = 0; i < embeds.length; i += maxEmbedsPerMessage) {
             const embedsSlice = embeds.slice(i, i + maxEmbedsPerMessage);
             if (i === 0) {
-                await interaction.reply({ embeds: embedsSlice, ephemeral: true });
+                await interaction.reply({ embeds: embedsSlice, ephemeral: isEphemeral });
             } else {
-                await interaction.followUp({ embeds: embedsSlice, ephemeral: true });
+                await interaction.followUp({ embeds: embedsSlice, ephemeral: isEphemeral });
             }
         }
 

@@ -30,6 +30,13 @@ export const data = new SlashCommandBuilder()
             .setRequired(false));
 
 export async function execute(interaction) {
+    if (!interaction.member.roles.cache.has(env.discordSecureAccessRoleID)) {
+        await interaction.reply({
+            content: 'You do not have permission to use this command.',
+            ephemeral: true,
+        });
+        return;
+    }
     const syncType = interaction.options.getString('sync-type');
     const discordUser = interaction.options.getUser('discord-user');
     const memberUUID = interaction.options.getString('member-uuid');

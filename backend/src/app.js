@@ -28,6 +28,7 @@ const corsOptions={
 
 app.use(cors(corsOptions));
 app.use(conditionalJson); // express.json is used if expecting json, otherwise not.
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
 app.use(session({
     store: new RedisStore({ client: redisClient }),

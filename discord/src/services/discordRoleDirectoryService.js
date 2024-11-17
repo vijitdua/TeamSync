@@ -12,6 +12,24 @@ async function updateRoleDetails(discordRoleID, roleName, roleColor) {
             roleColor: roleColor || null,
         };
 
+        // Check if role exists
+        const getResponse = await axios.get(`${env.backendURL}/discord/role/${discordRoleID}`).catch(error => {
+            if (error.response && error.response.status !== 404) {
+                // console.error(`Failed to get role ${discordRoleID}:`, error.message);
+            }
+        });
+
+        // If role exists, delete it
+        if (getResponse && getResponse.status === 200 && getResponse.data.success) {
+            await axios.delete(`${env.backendURL}/discord/role/${discordRoleID}`, {
+                headers: {
+                    Cookie: sessionCookie
+                }
+            }).catch(error => {
+                console.error(`Failed to delete role ${discordRoleID}:`, error.message);
+            });
+        }
+
         const response = await axios.post(`${env.backendURL}/discord/role`, roleData, {
             headers: {
                 Cookie: sessionCookie // Use session cookie from auth.js

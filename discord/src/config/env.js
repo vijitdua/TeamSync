@@ -26,4 +26,6 @@ export const env = {
     // Project meta
     rootLocation: projectRoot,
     srcLocation: join(projectRoot, "./src"),
+
+    port: process.env.PORT || 3000,
 };

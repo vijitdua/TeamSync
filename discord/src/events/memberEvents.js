@@ -8,8 +8,9 @@ export function setupMemberEvents(client) {
         const discordUsername = newMember.user.username;
         const discordDisplayName = newMember.displayName;
         const discordProfilePictureUrl = newMember.user.displayAvatarURL();
+        const discordRoleIDs = newMember.roles.cache.map(role => role.id);
 
-        await updateMemberDetails(discordID, discordUsername, discordDisplayName, discordProfilePictureUrl);
+        await updateMemberDetails(discordID, discordUsername, discordDisplayName, discordProfilePictureUrl, discordRoleIDs);
     });
 
     // Listen for when a new member joins the server
@@ -18,7 +19,8 @@ export function setupMemberEvents(client) {
         const discordUsername = newMember.user.username;
         const discordDisplayName = newMember.displayName;
         const discordProfilePictureUrl = newMember.user.displayAvatarURL();
+        const discordRoleIDs = newMember.roles.cache.map(role => role.id);
 
-        await updateMemberDetails(discordID, discordUsername, discordDisplayName, discordProfilePictureUrl);
+        await updateMemberDetails(discordID, discordUsername, discordDisplayName, discordProfilePictureUrl, discordRoleIDs);
     });
 }

@@ -31,4 +31,4 @@ export const discordGuildMemberModel = sequelize.define('discordGuildMembers', {
     tableName: 'discordGuildMembers',
 });
 
-discordGuildMemberModel.sync({alter: true});
+discordGuildMemberModel.sync();

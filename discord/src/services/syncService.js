@@ -1,297 +1,183 @@
-import client from '../client.js';
+// services/syncService.js
+
+import axios from 'axios';
+import client from '../client.js'; // Importing client to interact with Discord
 import {
-    getMemberDataPrivate,
     getUUIDByDiscordId,
-    updateMember,
+    getDiscordIdByMemberUUID,
+    updateMember
 } from './memberService.js';
 import {
     getTeamPublicData,
-    getTeamUUIDByDiscordRoleId,
+    getTeamUUIDByDiscordRoleId
 } from './teamService.js';
+import { env } from '../config/env.js';
+import { sessionCookie } from './auth.js';
 
 /**
- * Gets a member's Discord roles based on the teams they belong to in the backend.
- * @param {string} discordMemberId - The Discord ID of the member.
- * @param {string} [sessionId] - Optional. The session ID for authentication.
- * @returns {Promise<Array<{ teamUUID: string, teamDiscordId: string }>>}
+ * Syncs Discord roles to the backend.
+ * @param {string} discordId - The Discord ID of the member.
+ * @param {string} memberUUID - The UUID of the member in the backend.
+ * @returns {Promise<void>}
  */
-export async function getMemberDiscordRolesByBackendTeams(
-    discordMemberId,
-    sessionId
-) {
-    try {
-        // Get the member's UUID from the backend using their Discord ID
-        const memberUUID = await getUUIDByDiscordId(discordMemberId);
-        if (!memberUUID) {
-            throw new Error(`No member found in backend with Discord ID ${discordMemberId}`);
-        }
-
-        // Get member data from backend
-        const memberDataResponse = await getMemberDataPrivate(memberUUID, sessionId);
-        if (!memberDataResponse.success) {
-            throw new Error(
-                `Failed to get member data for UUID ${memberUUID}: ${memberDataResponse.message}`
-            );
-        }
-        const memberData = memberDataResponse.data;
-
-        // Get the teams the member belongs to
-        const teamsUUIDs = memberData.teams || []; // array of team UUIDs
-
-        const result = [];
-
-        // For each team, get the team's public data to get the discordId
-        for (const teamUUID of teamsUUIDs) {
-            const teamDataResponse = await getTeamPublicData(teamUUID);
-            if (teamDataResponse.success) {
-                const teamData = teamDataResponse.data;
-                if (teamData.discordId) {
-                    result.push({
-                        teamUUID: teamUUID,
-                        teamDiscordId: teamData.discordId,
-                    });
-                }
-            } else {
-                console.error(
-                    `Failed to get team data for team UUID ${teamUUID}: ${teamDataResponse.message}`
-                );
-            }
-        }
-
-        return result;
-    } catch (error) {
-        console.error(`Error in getMemberDiscordRolesByBackendTeams: ${error.message}`);
-        throw error; // Rethrow the error
-    }
-}
-
-/**
- * Gets a member's backend teams based on the Discord roles they have.
- * @param {string} discordMemberId - The Discord ID of the member.
- * @returns {Promise<Array<{ discordRoleId: string, teamUUID: string }>>}
- */
-export async function getMemberBackendTeamsByDiscordRoles(discordMemberId) {
+export async function syncDiscordToBackend(discordId, memberUUID) {
     try {
         const guild = client.guilds.cache.first();
         if (!guild) {
-            throw new Error('No guild found.');
+            throw new Error('Bot is not part of any guild.');
         }
 
-        const member = await guild.members.fetch(discordMemberId);
+        const member = await guild.members.fetch(discordId);
         if (!member) {
-            throw new Error(`Member with ID ${discordMemberId} not found.`);
+            throw new Error(`Member with Discord ID ${discordId} not found in Discord.`);
         }
 
-        const memberRoleIds = member.roles.cache.map((role) => role.id);
+        // Fetch all team roles from the backend
+        const teamRoleIds = await getAllTeamRoleIds();
+        if (!teamRoleIds.length) {
+            console.warn('No team roles found in the backend.');
+        }
 
-        const result = [];
+        // Identify roles that are linked to teams
+        const memberTeamRoleIds = member.roles.cache
+            .filter(role => teamRoleIds.includes(role.id))
+            .map(role => role.id);
 
-        // For each role ID, check if there is a team in the backend associated with it
-        for (const discordRoleId of memberRoleIds) {
-            const teamUUID = await getTeamUUIDByDiscordRoleId(discordRoleId);
+        // Map role IDs to team UUIDs
+        const memberTeamUUIDs = [];
+        for (const roleId of memberTeamRoleIds) {
+            const teamUUID = await getTeamUUIDByDiscordRoleId(roleId);
             if (teamUUID) {
-                result.push({
-                    discordRoleId: discordRoleId,
-                    teamUUID: teamUUID,
-                });
+                memberTeamUUIDs.push(teamUUID);
             }
-        }
-
-        return result;
-    } catch (error) {
-        console.error(`Error in getMemberBackendTeamsByDiscordRoles: ${error.message}`);
-        throw error; // Rethrow the error
-    }
-}
-
-/**
- * Syncs a member's teams in the backend based on their Discord roles.
- * @param {string} discordMemberId - The Discord ID of the member.
- * @param {boolean} overwrite - Whether to overwrite the member's teams in the backend.
- * @param {string} [sessionId] - Optional. The session ID for authentication.
- * @returns {Promise<void>}
- */
-export async function syncMemberDiscordTeamsByRolesToDatabase(
-    discordMemberId,
-    overwrite = false,
-    sessionId
-) {
-    try {
-        // Get member's backend teams based on their Discord roles
-        const memberTeamsByRoles = await getMemberBackendTeamsByDiscordRoles(discordMemberId);
-        const teamUUIDsFromRoles = memberTeamsByRoles.map((item) => item.teamUUID);
-
-        // Get the member's UUID from the backend using their Discord ID
-        const memberUUID = await getUUIDByDiscordId(discordMemberId);
-        if (!memberUUID) {
-            throw new Error(`No member found in backend with Discord ID ${discordMemberId}`);
-        }
-
-        // Get member's current teams from backend
-        const memberDataResponse = await getMemberDataPrivate(memberUUID, sessionId);
-        if (!memberDataResponse.success) {
-            throw new Error(
-                `Failed to get member data for UUID ${memberUUID}: ${memberDataResponse.message}`
-            );
-        }
-        const memberData = memberDataResponse.data;
-        const currentTeamUUIDs = memberData.teams || [];
-
-        let newTeamUUIDs;
-        if (overwrite) {
-            newTeamUUIDs = teamUUIDsFromRoles;
-        } else {
-            // Combine the existing teams with the new ones
-            const teamUUIDSet = new Set([...currentTeamUUIDs, ...teamUUIDsFromRoles]);
-            newTeamUUIDs = Array.from(teamUUIDSet);
         }
 
         // Update the member's teams in the backend
-        const updateResponse = await updateMember(
-            memberUUID,
-            { teams: newTeamUUIDs },
-            sessionId
-        );
-        if (!updateResponse.success) {
-            throw new Error(`Failed to update member teams: ${updateResponse.message}`);
-        }
+        await updateMember(memberUUID, { teams: memberTeamUUIDs }, sessionCookie);
 
-        console.log(`Member ${memberUUID} teams updated successfully in backend.`);
+        console.log(`Discord to Backend sync completed for member ${discordId} (UUID: ${memberUUID}).`);
     } catch (error) {
-        console.error(`Error in syncMemberDiscordTeamsByRolesToDatabase: ${error.message}`);
-        throw error; // Rethrow the error
+        console.error(`Error in syncDiscordToBackend: ${error.message}`);
+        throw error;
     }
 }
 
 /**
- * Syncs a member's Discord roles based on their teams in the backend.
- * @param {string} discordMemberId - The Discord ID of the member.
- * @param {boolean} overwrite - Whether to remove roles not present in the backend.
- * @param {string} [sessionId] - Optional. The session ID for authentication.
+ * Syncs backend teams to Discord roles.
+ * @param {string} discordId - The Discord ID of the member.
+ * @param {string} memberUUID - The UUID of the member in the backend.
  * @returns {Promise<void>}
  */
-export async function syncMemberTeamsByDatabaseToDiscordRoles(
-    discordMemberId,
-    overwrite = true,
-    sessionId
-) {
+export async function syncBackendToDiscord(discordId, memberUUID) {
     try {
         const guild = client.guilds.cache.first();
         if (!guild) {
-            throw new Error('No guild found.');
+            throw new Error('Bot is not part of any guild.');
         }
 
-        const member = await guild.members.fetch(discordMemberId);
+        const member = await guild.members.fetch(discordId);
         if (!member) {
-            throw new Error(`Member with ID ${discordMemberId} not found.`);
+            throw new Error(`Member with Discord ID ${discordId} not found in Discord.`);
         }
 
-        // Refresh role cache
-        await guild.roles.fetch();
-
-        // Get member's Discord roles based on their backend teams
-        const memberDiscordRolesByTeams = await getMemberDiscordRolesByBackendTeams(
-            discordMemberId,
-            sessionId
-        );
-        const roleIdsFromTeams = memberDiscordRolesByTeams.map((item) => item.teamDiscordId);
-
-        const currentRoleIds = member.roles.cache.map((role) => role.id);
-
-        console.log(`Current Roles of Member ${discordMemberId}:`, currentRoleIds);
-        console.log(`Roles from Backend for Member ${discordMemberId}:`, roleIdsFromTeams);
-
-        // Get the bot's highest role position
-        const botRolePosition = guild.members.me.roles.highest.position;
-
-        // Validate roles from backend
-        const validRoleIdsFromTeams = roleIdsFromTeams.filter((roleId) => {
-            const role = guild.roles.cache.get(roleId);
-            if (!role) {
-                console.warn(`Role with ID ${roleId} does not exist in the guild. Skipping.`);
-                return false;
-            }
-            if (role.position >= botRolePosition) {
-                console.warn(
-                    `Cannot manage role ${role.name} (ID: ${roleId}) due to role hierarchy. Skipping.`
-                );
-                return false;
-            }
-            return true;
+        // Fetch member's teams from the backend
+        const memberDataResponse = await axios.get(`${env.backendURL}/member/${memberUUID}`, {
+            headers: { Cookie: sessionCookie },
         });
 
-        if (overwrite) {
-            // Remove roles not in validRoleIdsFromTeams
-            const rolesToRemove = currentRoleIds.filter(
-                (roleId) => !validRoleIdsFromTeams.includes(roleId)
-            );
-            for (const roleId of rolesToRemove) {
-                try {
-                    const role = guild.roles.cache.get(roleId);
-                    if (!role || role.position >= botRolePosition) continue;
-                    await member.roles.remove(roleId);
-                    console.log(`Removed role ${roleId} from member ${discordMemberId}.`);
-                } catch (error) {
-                    console.error(`Failed to remove role ${roleId}: ${error.message}`);
-                }
-            }
-            // Add roles that are in validRoleIdsFromTeams but not in currentRoleIds
-            const rolesToAdd = validRoleIdsFromTeams.filter(
-                (roleId) => !currentRoleIds.includes(roleId)
-            );
-            for (const roleId of rolesToAdd) {
-                try {
-                    await member.roles.add(roleId);
-                    console.log(`Added role ${roleId} to member ${discordMemberId}.`);
-                } catch (error) {
-                    console.error(`Failed to add role ${roleId}: ${error.message}`);
-                }
-            }
-        } else {
-            // Just add roles from backend teams
-            const rolesToAdd = validRoleIdsFromTeams.filter(
-                (roleId) => !currentRoleIds.includes(roleId)
-            );
-            for (const roleId of rolesToAdd) {
-                try {
-                    await member.roles.add(roleId);
-                    console.log(`Added role ${roleId} to member ${discordMemberId}.`);
-                } catch (error) {
-                    console.error(`Failed to add role ${roleId}: ${error.message}`);
-                }
+        if (memberDataResponse.status !== 200 || !memberDataResponse.data.data) {
+            throw new Error('Failed to fetch member data from backend.');
+        }
+
+        const memberTeams = memberDataResponse.data.data.teams || [];
+
+        // Map team UUIDs to Discord role IDs
+        const targetRoleIds = [];
+        for (const teamUUID of memberTeams) {
+            const teamDataResponse = await getTeamPublicData(teamUUID);
+            if (teamDataResponse.success && teamDataResponse.data.discordId) {
+                targetRoleIds.push(teamDataResponse.data.discordId);
             }
         }
 
-        console.log(`Member ${discordMemberId} roles updated successfully in Discord.`);
+        // Fetch all team roles from the backend
+        const allTeamRoleIds = await getAllTeamRoleIds();
+
+        // Identify current team roles in Discord
+        const currentTeamRoleIds = member.roles.cache
+            .filter(role => allTeamRoleIds.includes(role.id))
+            .map(role => role.id);
+
+        // Remove roles not in backend teams
+        const rolesToRemove = currentTeamRoleIds.filter(roleId => !targetRoleIds.includes(roleId));
+        for (const roleId of rolesToRemove) {
+            try {
+                await member.roles.remove(roleId);
+                console.log(`Removed role ${roleId} from member ${discordId}.`);
+            } catch (removeError) {
+                console.error(`Failed to remove role ${roleId}: ${removeError.message}`);
+            }
+        }
+
+        // Add roles from backend teams
+        const rolesToAdd = targetRoleIds.filter(roleId => !member.roles.cache.has(roleId));
+        for (const roleId of rolesToAdd) {
+            try {
+                await member.roles.add(roleId);
+                console.log(`Added role ${roleId} to member ${discordId}.`);
+            } catch (addError) {
+                console.error(`Failed to add role ${roleId}: ${addError.message}`);
+            }
+        }
+
+        console.log(`Backend to Discord sync completed for member ${discordId} (UUID: ${memberUUID}).`);
     } catch (error) {
-        console.error(`Error in syncMemberTeamsByDatabaseToDiscordRoles: ${error.message}`);
-        throw error; // Rethrow the error
+        console.error(`Error in syncBackendToDiscord: ${error.message}`);
+        throw error;
     }
 }
 
-
 /**
- * Syncs a member's teams between Discord and backend in both directions.
- * @param {string} discordMemberId - The Discord ID of the member.
- * @param {string} [sessionId] - Optional. The session ID for authentication.
+ * Performs synchronization in both directions.
+ * @param {string} discordId - The Discord ID of the member.
+ * @param {string} memberUUID - The UUID of the member in the backend.
  * @returns {Promise<void>}
  */
-export async function syncMemberDiscordToBackendAndBackendToDiscord(
-    discordMemberId,
-    sessionId
-) {
+export async function syncBothWays(discordId, memberUUID) {
     try {
-        // Sync Discord roles to backend teams
-        await syncMemberDiscordTeamsByRolesToDatabase(discordMemberId, false, sessionId);
+        // Sync Discord roles to backend
+        await syncDiscordToBackend(discordId, memberUUID);
 
         // Sync backend teams to Discord roles
-        await syncMemberTeamsByDatabaseToDiscordRoles(discordMemberId, false, sessionId);
+        await syncBackendToDiscord(discordId, memberUUID);
 
-        console.log(`Member ${discordMemberId} synchronization completed.`);
+        console.log(`Both-way sync completed for member ${discordId} (UUID: ${memberUUID}).`);
     } catch (error) {
-        console.error(
-            `Error in syncMemberDiscordToBackendAndBackendToDiscord: ${error.message}`
-        );
-        throw error; // Rethrow the error
+        console.error(`Error in syncBothWays: ${error.message}`);
+        throw error;
+    }
+}
+
+/**
+ * Fetches all team role IDs from the backend.
+ * @returns {Promise<Array<string>>}
+ */
+async function getAllTeamRoleIds() {
+    try {
+        const response = await axios.get(`${env.backendURL}/team/roles`, {
+            headers: { Cookie: sessionCookie },
+        });
+
+        if (response.status === 200 && response.data.data) {
+            return response.data.data
+                .filter(team => team.discordId) // Ensure discordId exists
+                .map(team => team.discordId);
+        } else {
+            console.error(`Failed to retrieve team roles: ${response.data.message}`);
+            return [];
+        }
+    } catch (error) {
+        console.error(`Error fetching team role IDs: ${error.message}`);
+        return [];
     }
 }

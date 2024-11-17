@@ -56,3 +56,11 @@ export function isAuthenticatedUserMiddleware(req, res, next) {
 export function isAuthenticatedUser(req) {
     return req.isAuthenticated();
 }
+
+// Function to check if user is authenticated
+export function isAuthenticatedController(req, res) {
+    if (req.isAuthenticated()) {
+        return res.status(200).json({ auth: true });
+    }
+    return res.status(401).json({ auth: false, message: 'Unauthorized' });
+}

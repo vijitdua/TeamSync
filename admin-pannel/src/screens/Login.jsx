@@ -5,17 +5,15 @@ import { auth } from "../services/auth";
 import { routes } from "../config/routesConfig";
 import { useNavigate } from "react-router-dom";
 
-// call auth function to attempt login
-// successful login sends cookie back for future requests
-// todo: add check to see if successful login, if so, redirect
-
-
 // todo: improve this layout it's really meh
 function Login() {
     const navigate = useNavigate();
     const [username, setUsername] = useState(null);
     const [password, setPassword] = useState(null);
 
+    // call auth function to attempt login
+    // successful login sends cookie back for future requests
+    // todo: add check to see if successful login, if so, redirect
     function handleSubmit(username, password) {
         auth(username, password)
             .then((isLoggedIn) => {

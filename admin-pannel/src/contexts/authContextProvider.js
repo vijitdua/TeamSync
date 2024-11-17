@@ -25,7 +25,12 @@ export function AuthProvider({ children }) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // TODO: ADD A CODE HERE THAT FETCHES SESSION COOKIE, CHECK IF IT EXISTS. AND THEN CHANGED LOGGED IN TO REPRESENT IF AUTHENTICATED OR NOT. AND THEN MODIFY LOADING TO FALSE WHEN FINISHED
+        // note: browser js cannot access cookies. need to check login state with backend instead!!!
+        // make get request to check if carrying cookie
+        // change isLoggedIn and modify loading to false
+        
+        setIsLoggedIn(true);  // change manually for development
+        setLoading(false);
     }, []);
 
     const value = {isLoggedIn};

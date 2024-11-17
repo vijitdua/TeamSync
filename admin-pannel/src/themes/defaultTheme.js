@@ -10,6 +10,9 @@ import '@fontsource/inter/600.css';
 import '@fontsource/inter/700.css';
 
 // todo: actually decide on a theme lol this is just random shit
+const primaryColor = '#5d5aff';  // discord icon-like shade lmao
+const primaryLight = '#827fff';
+const primaryDark = '#3632d1';
 
 let theme = createTheme({
     breakpoints: {
@@ -24,9 +27,9 @@ let theme = createTheme({
 
     palette: {
         primary: {
-            main: '#5d5aff', // discord icon-like shade lmao
-            light: '#827fff', 
-            dark: '#3632d1',
+            main: primaryColor, 
+            light: primaryLight, 
+            dark: primaryDark,
             contrastText: '#ffffff',
         },
         secondary: {
@@ -97,11 +100,22 @@ let theme = createTheme({
                     marginRight: '11px',
                     transition: 'transform 0.3s ease',
                 },
-                link: { // a button styled to look like a link
-                    '&:hover': {
-                        backgroundColor: "transparent",
-                    },
-                    padding: 0,
+            },
+        },
+        MuiStack: {
+            styleOverrides: {
+                root: {
+                    variants: [
+                        {
+                            props: { variant: "sidebar" },
+                            style: {
+                                backgroundColor: primaryDark,
+                                color: "#ffffff",
+                                padding: "1rem",
+                            },
+                        }
+                    ],
+                    
                 }
             },
         },

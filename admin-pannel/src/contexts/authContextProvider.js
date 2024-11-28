@@ -25,9 +25,7 @@ export function AuthProvider({ children }) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // note: browser js cannot access cookies. need to check login state with backend instead!!!
-        // make get request to check if carrying cookie
-        // change isLoggedIn and modify loading to false
+        // todo: check for cookie and force login if needed
         
         setIsLoggedIn(true);  // change manually for development
         setLoading(false);

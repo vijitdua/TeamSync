@@ -43,7 +43,7 @@ function MainLayout({children}){
             minHeight: "100vh",
         }}>
             <Stack spacing={10} variant="sidebar">
-                <Typography variant="h1" gutterBottom>Team Sync</Typography>  {/* placeholder for image */}
+                <Typography variant="h1" gutterBottom onClick={() => navigate(routes.home)} sx={{ cursor: "pointer" }}>Team Sync</Typography>  {/* placeholder for image */}
                 <List sx={{
                     display: "flex",
                     flexDirection: "column",

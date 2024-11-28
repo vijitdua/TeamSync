@@ -1,7 +1,11 @@
-import { Box, List, ListItemButton, ListItemText, Stack, Typography, useTheme } from "@mui/material";
+import { Box, Container, List, ListItemButton, ListItemText, Stack, Typography, useTheme } from "@mui/material";
 import { routes } from "../config/routesConfig";
+import { useNavigate } from "react-router-dom";
 
 function MainLayout({children}){
+    const navigate = useNavigate();
+    const theme = useTheme();
+
     const navOptions = [
         {
             name: "Members",
@@ -24,7 +28,15 @@ function MainLayout({children}){
         }
     ];
 
-    const theme = useTheme();
+    function handleNavClick(route) {
+        if (route) {
+            navigate(route);
+        } else {
+            // TODO: MAKE THIS ACTUALLY LOG OUT
+            navigate(routes.login);
+        }
+    }
+    
     return (
         <Box sx={{
             display: "flex",
@@ -39,16 +51,20 @@ function MainLayout({children}){
                 }}>
                     { navOptions.map((option, idx) => {
                         return (
-                            <ListItemButton key={ idx }>
+                            <ListItemButton key={ idx } onClick={() => handleNavClick(option.route)}>
                                 <ListItemText>{ option.name }</ListItemText>
                             </ListItemButton>
                         );
                     }) }
                 </List>
             </Stack>
-            <Stack>
-                <Typography variant="h1" gutterBottom>{process.env.REACT_APP_COMPANY_NAME}</Typography> 
-                {children}
+            <Stack variant="content-wrapper" sx={{
+                padding: "2rem",
+            }}>
+                <Typography variant="h1" gutterBottom>{process.env.REACT_APP_COMPANY_NAME}</Typography>
+                <Container sx={{
+                    flex: "1",
+                }}>{children}</Container>
                 <Typography variant="body2">developed by Naomi & Vijit @ TeamSync</Typography>
             </Stack>
         </Box>

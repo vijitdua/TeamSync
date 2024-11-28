@@ -113,7 +113,16 @@ let theme = createTheme({
                                 color: "#ffffff",
                                 padding: "1rem",
                             },
-                        }
+                        },
+                        {
+                            props: { variant: "content-wrapper" },
+                            style: {
+                                width: "100%",
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                            },
+                        },
                     ],
                     
                 }

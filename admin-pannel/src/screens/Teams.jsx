@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import TeamRow from "../components/team-row/teamRow";
 import MainLayout from "../layouts/MainLayout";
-import { Container, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
+import { Box, Container, Grid2, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
+import AddIcon from '@mui/icons-material/Add';
 import fetchTeams from "../services/fetchTeams";
 import fetchMember from "../services/fetchMember";
 import getMemberIdFromName from "../services/getMemberIdFromName";
@@ -125,12 +126,20 @@ function Teams() {
                                         borderRadius: "8px",
                                         height: "3rem",
                                         display: "flex",
-                                        justifyContent: "center",
                                         alignItems: "center",
+                                        cursor: "pointer",
                                         "&:hover": { backgroundColor: "#abbbee" }
                                     }}
                                 >
-                                    <Typography>Add Team</Typography>
+                                    <Box sx={{
+                                        position: "relative",
+                                        left: "1rem",
+                                    }}>
+                                        <Grid2 container spacing={2}>
+                                            <AddIcon />
+                                            <Typography>Add Team</Typography>
+                                        </Grid2>
+                                    </Box>
                                 </Container>
                             </TableCell>
                         </TableRow> }

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import TeamRow from "../components/team-row/teamRow";
 import MainLayout from "../layouts/MainLayout";
-import { Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
+import { Box, Container, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
 import fetchTeams from "../services/fetchTeams";
 import fetchMember from "../services/fetchMember";
 
@@ -105,14 +105,25 @@ function Teams() {
                                 />
                             );
                         }) }
-                        { newTeam === null && <TableRow sx={{
-                            "& td": {
+                        { newTeam === null && <TableRow>
+                            <TableCell colSpan={5} align="center" sx={{
                                 border: "none",
-                            },
-                            backgroundColor: "#bbc8f3",
-                        }}>
-                            <TableCell colSpan={5} onClick={startCreatingTeam} align="center">
-                                <Typography>Add Team</Typography>
+                                padding: "0.5rem",
+                            }}>
+                                <Container
+                                    onClick={startCreatingTeam}
+                                    sx={{
+                                        backgroundColor: "#bbc8f3",
+                                        borderRadius: "8px",
+                                        height: "3rem",
+                                        display: "flex",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        "&:hover": { backgroundColor: "#abbbee" }
+                                    }}
+                                >
+                                    <Typography>Add Team</Typography>
+                                </Container>
                             </TableCell>
                         </TableRow> }
                     </TableBody>

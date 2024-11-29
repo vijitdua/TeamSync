@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import TeamRow from "../components/team-row/teamRow";
 import MainLayout from "../layouts/MainLayout";
-import { Grid2, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
+import { Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
 import fetchTeams from "../services/fetchTeams";
 import fetchMember from "../services/fetchMember";
 

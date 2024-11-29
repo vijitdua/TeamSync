@@ -1,5 +1,5 @@
-import { Box, Checkbox, Container, Grid2, Paper, TableCell, TableRow, TextField, Typography } from "@mui/material";
-import { useEffect, useRef, useState } from "react";
+import { Box, Checkbox, Grid2, TableCell, TableRow, TextField, Typography } from "@mui/material";
+import { useRef, useState } from "react";
 
 
 function TeamRow({team, onToggleSelect, isSelectMode, isCreationMode, onChangeName, onChangeLead, onCompleteTeam}) {

@@ -22,6 +22,7 @@ function TeamRow({team, onToggleSelect, isSelectMode, isCreationMode, onChangeNa
               padding: "0",
             },
             backgroundColor: (isSelected || isHovered)? "#bbc8f3" : "transparent",
+            height: "4rem",
         }}
         onMouseOver={() => {
             setIsHovered(true);

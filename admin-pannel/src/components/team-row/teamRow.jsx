@@ -15,6 +15,13 @@ function TeamRow({team, onToggleSelect, isSelectMode, isCreationMode, onChangeNa
         onToggleSelect();
     }
 
+    async function attemptCompleteTeam() {
+        const response = await onCompleteTeam();
+        if (response === true) {
+            setIsCreating(false);
+        }
+    }
+
     return (
         <TableRow sx={{
             "& td": {
@@ -53,8 +60,8 @@ function TeamRow({team, onToggleSelect, isSelectMode, isCreationMode, onChangeNa
             <TableCell>{(isCreating) ? <TextField 
                 onChange={(e) => onChangeName(e.target.value)} 
                 onKeyDown={(e) => {
-                    if (e.key === "Enter" && onCompleteTeam()) {
-                        setIsCreating(false);
+                    if (e.key === "Enter") {
+                        attemptCompleteTeam();
                     }
                 }}
                 onFocus={() => {
@@ -63,8 +70,8 @@ function TeamRow({team, onToggleSelect, isSelectMode, isCreationMode, onChangeNa
                 onBlur={() => {
                     focusField.current = 0;
                     setTimeout(() => {
-                        if (focusField.current === 0 && onCompleteTeam()) {
-                            setIsCreating(false);
+                        if (focusField.current === 0) {
+                            attemptCompleteTeam();
                         }
                     }, 0);
                 }}
@@ -80,8 +87,8 @@ function TeamRow({team, onToggleSelect, isSelectMode, isCreationMode, onChangeNa
                     {(isCreating)? <TextField 
                         onChange={(e) => onChangeLead(e.target.value)}
                         onKeyDown={(e) => {
-                            if (e.key === "Enter" && onCompleteTeam()) {
-                                setIsCreating(false);
+                            if (e.key === "Enter") {
+                                attemptCompleteTeam();
                             }
                         }}
                         onFocus={() => {
@@ -89,9 +96,9 @@ function TeamRow({team, onToggleSelect, isSelectMode, isCreationMode, onChangeNa
                         }}
                         onBlur={() => {
                             focusField.current = 0;
-                            setTimeout(() => {
-                                if (focusField.current === 0 && onCompleteTeam()) {
-                                    setIsCreating(false);
+                            setTimeout(async () => {
+                                if (focusField.current === 0) {
+                                    attemptCompleteTeam();
                                 }
                             }, 0);
                         }}

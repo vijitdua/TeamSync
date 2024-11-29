@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import TeamRow from "../components/team-row/teamRow";
 import MainLayout from "../layouts/MainLayout";
-import { Box, Container, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
+import { Container, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
 import fetchTeams from "../services/fetchTeams";
 import fetchMember from "../services/fetchMember";
+import getMemberIdFromName from "../services/getMemberIdFromName";
 
 function Teams() {
     const [selectedTeams, setSelectedTeams] = useState(new Set([]));
@@ -63,10 +64,17 @@ function Teams() {
         nextTeam.teamLead[0] = name;
     }
 
-    function completeNewTeam() {
-        if (newTeam.hasOwnProperty("teamLead") && newTeam.teamLead[0] !== "" && newTeam.name) {
+    async function completeNewTeam() {
+        if (newTeam !== null && newTeam.hasOwnProperty("teamLead") && newTeam.teamLead[0] !== "" && newTeam.name) {
+            const teamLeadId = await getMemberIdFromName(newTeam.teamLead[0]);
+            if (teamLeadId === null) {
+                console.log("didn't find lead name");
+                return false;
+            };
+            const nextTeam = newTeam;
+            nextTeam.teamLead[0] = teamLeadId;
             const newTeams = teamData;
-            newTeams[newTeams.length - 1] = newTeam;
+            newTeams[newTeams.length - 1] = nextTeam;
             setTeamData(newTeams);
             setNewTeam(null);
             console.log(newTeams);

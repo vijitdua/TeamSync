@@ -1,9 +1,10 @@
-import { Box, Checkbox, Container, Grid2, Paper, Typography } from "@mui/material";
+import { Box, Checkbox, Container, Grid2, Paper, TableCell, TableRow, Typography } from "@mui/material";
 import { useState } from "react";
 
 
-function TeamRow({team, onToggleSelect}) {
+function TeamRow({team, onToggleSelect, isSelectMode}) {
     const [isSelected, setIsSelected] = useState(false);
+    const [isHovered, setIsHovered] = useState(false);
 
     function toggleSelect() {
         setIsSelected(!isSelected);
@@ -11,64 +12,70 @@ function TeamRow({team, onToggleSelect}) {
     }
 
     return (
-        <Paper variant="outlined" sx={{
-            backgroundColor: isSelected ? "#e9eeff" : "#d6ddf9",
-            padding: "0.5rem",
-        }}>
-            <Grid2 container spacing={2} sx={{
-                alignItems: "center",
+        <TableRow sx={{
+            "& td": {
+              borderBottom: "1px solid #a9b8ec",
+              padding: "0",
+            },
+            backgroundColor: (isSelected || isHovered)? "#bbc8f3" : "transparent",
+        }}
+        onMouseOver={() => {
+            setIsHovered(true);
+        }}
+        onMouseOut={() => {
+            setIsHovered(false);
+        }}
+        >
+            {/* Checkbox */}
+            <TableCell align="center" sx={{
+                width: "4rem",
             }}>
-                {/* Checkbox */}
-                <Grid2 size={0.5} sx={{
-                    display: "flex",
-                    justifyContent: "center",
-                }}>
-                    <Checkbox onChange={ toggleSelect }></Checkbox>
-                </Grid2>
+                <Checkbox onChange={ toggleSelect } sx={{
+                    display: (isHovered || isSelectMode)? "inline" : "none",
+                }}></Checkbox>
+            </TableCell>
 
-                {/* Logo */}
-                <Grid2 size={{xs: 2, md: 1}} sx={{
-                    height: "3rem",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                }}>
-                    <Box component="img" src={team.teamLogo} sx={{
-                        maxHeight: "100%",
-                        maxWidth: "100%",
-                    }}></Box>
-                </Grid2>
-            
-                {/* Team Name */}
-                <Grid2 size={{xs: 2, md: 3}}>{team.name}</Grid2>
-            
-                {/* Team Lead */}
-                <Grid2 size={4} sx={{
-                    height: "3rem",
-                    display: "flex",
-                    gap: "1rem",
-                }}>
+            {/* Logo */}
+            <TableCell align="center" sx={{
+                width: "4rem",
+            }}>
+                <Box component="img" src={team.teamLogo} sx={{
+                    maxWidth: "100%",
+                }}></Box>
+            </TableCell>
+        
+            {/* Team Name */}
+            <TableCell>{team.name}</TableCell>
+        
+            {/* Team Lead */}
+            <TableCell sx={{
+                height: "3rem",
+            }}>
+                <Grid2 container spacing={2}>
                     { (team.teamLead.map((lead, idx) => {
                         return (
-                            <Grid2 key={idx} container sx={{
-                                height: "100%",
-                                alignItems: "center",
-                                gap: "1rem",
-                            }}>
-                                <Box component="img" src={lead.profilePicture} sx={{
-                                    height: "100%",
-                                }}></Box>
-                                <Typography>{lead.name}</Typography>
+                            <Grid2>
+                                <Grid2 key={idx} container spacing={1} sx={{
+                                    alignItems: "center",
+                                }}>
+                                    <Box component="img" src={lead.profilePicture} sx={{
+                                        maxHeight: "3rem",
+                                    }}></Box>
+                                    <Typography>{lead.name}</Typography>
+                                </Grid2>
                             </Grid2>
                         );
                     })) }
                 </Grid2>
-                {/* Discord Role */}
-                <Grid2 size={2}>
-                    <Typography>{team.discordId}</Typography>
-                </Grid2>
-            </Grid2>
-        </Paper>
+            </TableCell>
+
+            {/* Discord Role */}
+            <TableCell sx={{
+                borderRight: "none",
+            }}>
+                <Typography>{team.discordId}</Typography>
+            </TableCell>
+        </TableRow>
     );
 }
 

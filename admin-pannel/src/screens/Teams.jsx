@@ -1,7 +1,7 @@
 import { useState } from "react";
 import TeamRow from "../components/team-row/teamRow";
 import MainLayout from "../layouts/MainLayout";
-import { Container, Grid2, Stack, Typography } from "@mui/material";
+import { Grid2, Stack, Typography } from "@mui/material";
 
 function Teams() {
     const [selectedTeams, setSelectedTeams] = useState(new Set([]));
@@ -55,8 +55,8 @@ function Teams() {
                     }}>Team</Typography></Grid2>
                     <Grid2 size={4}><Typography variant="h3">Team Lead</Typography></Grid2>
                     <Grid2 size={2}><Typography variant="h3">Discord Role</Typography></Grid2>
-                
                 </Grid2>
+                
                 <Stack spacing={1}>
                     { teamData.map((team, idx) => {
                         return (

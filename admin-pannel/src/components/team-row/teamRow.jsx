@@ -1,10 +1,8 @@
-import { Box, Checkbox, Grid2, Paper, Typography, useTheme } from "@mui/material";
+import { Box, Checkbox, Grid2, Paper, Typography } from "@mui/material";
 import { useState } from "react";
 
 
 function TeamRow({team, onToggleSelect}) {
-    const theme = useTheme();
-
     const [isSelected, setIsSelected] = useState(false);
 
     function toggleSelect() {
@@ -26,6 +24,7 @@ function TeamRow({team, onToggleSelect}) {
                 }}>
                     <Checkbox onChange={ toggleSelect }></Checkbox>
                 </Grid2>
+                
                 {/* Logo */}
                 <Grid2 size={{xs: 2, md: 1}} sx={{
                     height: "3rem",

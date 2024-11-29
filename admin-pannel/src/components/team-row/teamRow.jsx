@@ -50,9 +50,8 @@ function TeamRow({team, onToggleSelect}) {
                 }}>
                     { (team.teamLead.map((lead, idx) => {
                         return (
-                            <Container key={idx} sx={{
+                            <Grid2 key={idx} container sx={{
                                 height: "100%",
-                                display: "flex",
                                 alignItems: "center",
                                 gap: "1rem",
                             }}>
@@ -60,7 +59,7 @@ function TeamRow({team, onToggleSelect}) {
                                     height: "100%",
                                 }}></Box>
                                 <Typography>{lead.name}</Typography>
-                            </Container>
+                            </Grid2>
                         );
                     })) }
                 </Grid2>

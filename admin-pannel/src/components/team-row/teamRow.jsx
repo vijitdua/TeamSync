@@ -1,10 +1,14 @@
-import { Box, Checkbox, Container, Grid2, Paper, TableCell, TableRow, Typography } from "@mui/material";
-import { useState } from "react";
+import { Box, Checkbox, Container, Grid2, Paper, TableCell, TableRow, TextField, Typography } from "@mui/material";
+import { useEffect, useRef, useState } from "react";
 
 
-function TeamRow({team, onToggleSelect, isSelectMode}) {
+function TeamRow({team, onToggleSelect, isSelectMode, isCreationMode, onChangeName, onChangeLead, onCompleteTeam}) {
     const [isSelected, setIsSelected] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
+    const [isCreating, setIsCreating] = useState(isCreationMode);
+
+    // 0 for none, 1 for name, 2 for teamLead
+    const focusField = useRef(1);
 
     function toggleSelect() {
         setIsSelected(!isSelected);
@@ -45,22 +49,62 @@ function TeamRow({team, onToggleSelect, isSelectMode}) {
             </TableCell>
         
             {/* Team Name */}
-            <TableCell>{team.name}</TableCell>
+            <TableCell>{(isCreating) ? <TextField 
+                onChange={(e) => onChangeName(e.target.value)} 
+                onKeyDown={(e) => {
+                    if (e.key === "Enter" && onCompleteTeam()) {
+                        setIsCreating(false);
+                    }
+                }}
+                onFocus={() => {
+                    focusField.current = 1;
+                }}
+                onBlur={() => {
+                    focusField.current = 0;
+                    setTimeout(() => {
+                        if (focusField.current === 0 && onCompleteTeam()) {
+                            setIsCreating(false);
+                        }
+                    }, 0);
+                }}
+            /> 
+            :
+            team.name}</TableCell>
         
             {/* Team Lead */}
             <TableCell sx={{
                 height: "3rem",
             }}>
                 <Grid2 container spacing={2}>
-                    { (team.teamLead.map((lead, idx) => {
+                    {(isCreating)? <TextField 
+                        onChange={(e) => onChangeLead(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter" && onCompleteTeam()) {
+                                setIsCreating(false);
+                            }
+                        }}
+                        onFocus={() => {
+                            focusField.current = 2;
+                        }}
+                        onBlur={() => {
+                            focusField.current = 0;
+                            setTimeout(() => {
+                                if (focusField.current === 0 && onCompleteTeam()) {
+                                    setIsCreating(false);
+                                }
+                            }, 0);
+                        }}
+                    />
+                    :
+                    (team.teamLead.map((lead, idx) => {
                         return (
                             <Grid2>
                                 <Grid2 key={idx} container spacing={1} sx={{
                                     alignItems: "center",
                                 }}>
-                                    <Box component="img" src={lead.profilePicture} sx={{
+                                    {!isCreating && <Box component="img" src={lead.profilePicture} sx={{
                                         maxHeight: "3rem",
-                                    }}></Box>
+                                    }}></Box>}
                                     <Typography>{lead.name}</Typography>
                                 </Grid2>
                             </Grid2>

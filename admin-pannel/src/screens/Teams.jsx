@@ -9,6 +9,7 @@ function Teams() {
     const [selectedTeams, setSelectedTeams] = useState(new Set([]));
     const [teamData, setTeamData] = useState([]);
     const [isSelectMode, setIsSelectMode] = useState(false);
+    const [newTeam, setNewTeam] = useState(null);
 
     useEffect(() => {
         const getTeams = async () => {
@@ -40,6 +41,40 @@ function Teams() {
         setSelectedTeams(newSelected);
     }
 
+    function startCreatingTeam() {
+        const nextTeam = {};
+        const newTeams = teamData;
+        teamData.push(nextTeam);
+        setNewTeam(nextTeam);
+        setTeamData(newTeams);
+    }
+
+    function changeTeamName(name) {
+        const nextTeam = newTeam;
+        nextTeam.name = name;
+        setNewTeam(nextTeam);
+    }
+
+    function changeTeamLead(name) {
+        const nextTeam = newTeam;
+        if (!nextTeam.hasOwnProperty("teamLead")) {
+            nextTeam.teamLead = [""];
+        }
+        nextTeam.teamLead[0] = name;
+    }
+
+    function completeNewTeam() {
+        if (newTeam.hasOwnProperty("teamLead") && newTeam.teamLead[0] !== "" && newTeam.name) {
+            const newTeams = teamData;
+            newTeams[newTeams.length - 1] = newTeam;
+            setTeamData(newTeams);
+            setNewTeam(null);
+            console.log(newTeams);
+            return true;
+        }
+        return false;
+    }
+
     return (
         <MainLayout>
             <Stack spacing={2}>
@@ -59,9 +94,27 @@ function Teams() {
                     <TableBody>
                         { teamData.map((team, idx) => {
                             return (
-                                <TeamRow key={idx} team={team} isSelectMode={isSelectMode} onToggleSelect={() => toggleSelectTeam(team.id)}></TeamRow>
+                                <TeamRow key={idx}
+                                    team={team}
+                                    isSelectMode={isSelectMode}
+                                    isCreationMode={newTeam !== null}
+                                    onToggleSelect={() => toggleSelectTeam(team.id)} 
+                                    onChangeName={changeTeamName}
+                                    onChangeLead={changeTeamLead}
+                                    onCompleteTeam={completeNewTeam}
+                                />
                             );
                         }) }
+                        { newTeam === null && <TableRow sx={{
+                            "& td": {
+                                border: "none",
+                            },
+                            backgroundColor: "#bbc8f3",
+                        }}>
+                            <TableCell colSpan={5} onClick={startCreatingTeam} align="center">
+                                <Typography>Add Team</Typography>
+                            </TableCell>
+                        </TableRow> }
                     </TableBody>
                 </Table>
                 

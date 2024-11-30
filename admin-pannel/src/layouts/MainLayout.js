@@ -1,11 +1,10 @@
-import { Box, Container, List, ListItemButton, ListItemText, Stack, Typography, useTheme } from "@mui/material";
+import { Box, Container, List, ListItemButton, ListItemText, Stack, Typography } from "@mui/material";
 import { routes } from "../config/routesConfig";
 import { useNavigate } from "react-router-dom";
 import TeamEditPanel from "../components/team-edit-panel/teamEditPanel";
 
 function MainLayout({children, teamEditing}){
     const navigate = useNavigate();
-    const theme = useTheme();
 
     const navOptions = [
         {

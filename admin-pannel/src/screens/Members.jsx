@@ -2,7 +2,7 @@ import MainLayout from "../layouts/MainLayout";
 
 function Members() {
     return (
-        <MainLayout>
+        <MainLayout teamEditing={null}>
             Members
         </MainLayout>
     );

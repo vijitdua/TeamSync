@@ -3,7 +3,7 @@ import MainLayout from "../layouts/MainLayout";
 
 function Home() {
     return(
-        <MainLayout>
+        <MainLayout teamEditing={null}>
             <Container sx={{
                 height: "100%",
                 width: "100%",

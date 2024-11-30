@@ -77,7 +77,7 @@ function TeamRow({ team, onToggleSelect, isSelectMode, isCreationMode, onChangeN
                 }}
             /> 
             :
-            <Typography onClick={() => setTeamEditing(team.id)}>{team.name}</Typography>}</TableCell>
+            <Typography onClick={() => setTeamEditing(team)}>{team.name}</Typography>}</TableCell>
         
             {/* Team Lead */}
             <TableCell sx={{
@@ -106,8 +106,8 @@ function TeamRow({ team, onToggleSelect, isSelectMode, isCreationMode, onChangeN
                     :
                     (team.teamLead.map((lead, idx) => {
                         return (
-                            <Grid2>
-                                <Grid2 key={idx} container spacing={1} sx={{
+                            <Grid2 key={idx}>
+                                <Grid2 container spacing={1} sx={{
                                     alignItems: "center",
                                 }}>
                                     {!isCreating && <Box component="img" src={lead.profilePicture} sx={{

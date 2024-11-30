@@ -6,11 +6,12 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import AddIcon from '@mui/icons-material/Add';
+import dayjs from "dayjs";
 
-function TeamEditPanel({team, isCreate}) {
-    const [teamLead, setTeamLead] = useState([]);
+function TeamEditPanel({teamEditing, isCreate}) {
+    const [teamLead, setTeamLead] = useState(teamEditing.teamLead);
     const [members, setMembers] = useState([]);
-    const [foundationDate, setFoundationDate] = useState(null);
+    const [foundationDate, setFoundationDate] = useState(isCreate? dayjs(new Date()) : dayjs(teamEditing.foundationDate));
 
     useEffect(() => {
         const getMembers = async () => {
@@ -25,6 +26,13 @@ function TeamEditPanel({team, isCreate}) {
         getMembers();
     }, [])
 
+    function changeTeamLead(idx, newId) {
+        const updatedTeamLead = teamLead.map((lead, index) => 
+            index === idx ? { ...lead, id: newId } : lead
+        );
+        setTeamLead(updatedTeamLead); 
+    }
+
     return (
         <Stack spacing={2} sx={{
             backgroundColor: "white",
@@ -38,42 +46,53 @@ function TeamEditPanel({team, isCreate}) {
             },
         }}>
             <Typography variant="h3">{isCreate ? "Create Team" : "Edit Team"}</Typography>
-            <Stack container spacing={1}>
+            <Stack spacing={1}>
                 <Typography>Team Name</Typography>
                 <TextField required></TextField>
             </Stack>
 
-            <Stack container spacing={1}>
+            <Stack spacing={1}>
                 <Typography>Team Leads</Typography>
-                <Select value={teamLead} className="dropdown" onChange={(e) => setTeamLead(e.target.value)}>
-                    { members.map((member, idx) => {
-                        return (<MenuItem key={idx} value={member.id}>{member.name}</MenuItem>);
-                    }) }
-                </Select>
+                { members.length? teamLead.map((currLead, idx) => {
+                    return(<Select 
+                        value={currLead.id}
+                        className="dropdown" 
+                        onChange={(e) => changeTeamLead(idx, e.target.value)}
+                        key={{idx}}
+                    >
+                        { members.map((member) => 
+                            (<MenuItem key={member.id} value={member.id}>
+                                {member.name}
+                            </MenuItem>)
+                        ) }
+                    </Select>);
+                })
+                :
+                <Typography>Loading...</Typography> }
             </Stack>
 
-            <Stack container spacing={1}>
+            <Stack spacing={1}>
                 <Typography>Team Discord</Typography>
-                <Select className="dropdown">
+                {/* <Select className="dropdown">
                     
-                </Select>
+                </Select> */}
             </Stack>
 
-            <Stack container spacing={1}>
+            <Stack spacing={1}>
                 <Typography>Foundation Date</Typography>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker />
+                    <DatePicker value={foundationDate} onChange={(e) => setFoundationDate(e.$d)}/>
                 </LocalizationProvider>
             </Stack>
 
-            <Stack container spacing={1}>
+            <Stack spacing={1}>
                 <Typography>Description</Typography>
                 <TextField multiline></TextField>
             </Stack>
 
             <Divider />
 
-            <Stack container spacing={1}>
+            <Stack spacing={1}>
                 <Typography>Notes</Typography>
                 <TextField multiline></TextField>
             </Stack>

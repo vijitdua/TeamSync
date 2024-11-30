@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import TeamRow from "../components/team-row/teamRow";
 import MainLayout from "../layouts/MainLayout";
-import { Box, Container, Grid2, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
+import { Box, Button, Container, Grid2, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
 import fetchTeams from "../services/fetchTeams";
 import fetchMember from "../services/fetchMember";
@@ -12,6 +12,7 @@ function Teams() {
     const [teamData, setTeamData] = useState([]);
     const [isSelectMode, setIsSelectMode] = useState(false);
     const [newTeam, setNewTeam] = useState(null);
+    const [teamEditing, setTeamEditing] = useState(null);
 
     useEffect(() => {
         const getTeams = async () => {
@@ -85,8 +86,18 @@ function Teams() {
     }
 
     return (
-        <MainLayout>
+        <MainLayout teamEditing={teamEditing}>
             <Stack spacing={2}>
+                <Grid2 container sx={{
+                    justifyContent: "flex-end",
+                }}>
+                    <Button variant="contained" onClick={() => setTeamEditing({})}>
+                        <Grid2 container spacing={1}>
+                            <AddIcon />
+                            <Typography>Add</Typography>
+                        </Grid2>
+                    </Button>
+                </Grid2>
                 <Table>
                     <TableHead>
                         <TableRow sx={{
@@ -111,6 +122,7 @@ function Teams() {
                                     onChangeName={changeTeamName}
                                     onChangeLead={changeTeamLead}
                                     onCompleteTeam={completeNewTeam}
+                                    setTeamEditing={setTeamEditing}
                                 />
                             );
                         }) }
@@ -145,7 +157,6 @@ function Teams() {
                         </TableRow> }
                     </TableBody>
                 </Table>
-                
             </Stack>
         </MainLayout>
     );

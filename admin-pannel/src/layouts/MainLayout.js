@@ -1,8 +1,9 @@
 import { Box, Container, List, ListItemButton, ListItemText, Stack, Typography, useTheme } from "@mui/material";
 import { routes } from "../config/routesConfig";
 import { useNavigate } from "react-router-dom";
+import TeamEditPanel from "../components/team-edit-panel/teamEditPanel";
 
-function MainLayout({children}){
+function MainLayout({children, teamEditing}){
     const navigate = useNavigate();
     const theme = useTheme();
 
@@ -67,6 +68,7 @@ function MainLayout({children}){
                 }}>{children}</Container>
                 <Typography variant="body2">developed by Naomi & Vijit @ TeamSync</Typography>
             </Stack>
+            { teamEditing !== null && <TeamEditPanel teamEditing={teamEditing}></TeamEditPanel> }
         </Box>
     );
 }

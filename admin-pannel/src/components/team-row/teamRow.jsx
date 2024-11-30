@@ -2,7 +2,7 @@ import { Box, Checkbox, Grid2, TableCell, TableRow, TextField, Typography } from
 import { useRef, useState } from "react";
 
 
-function TeamRow({team, onToggleSelect, isSelectMode, isCreationMode, onChangeName, onChangeLead, onCompleteTeam}) {
+function TeamRow({ team, onToggleSelect, isSelectMode, isCreationMode, onChangeName, onChangeLead, onCompleteTeam, setTeamEditing }) {
     const [isSelected, setIsSelected] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const [isCreating, setIsCreating] = useState(isCreationMode);
@@ -77,7 +77,7 @@ function TeamRow({team, onToggleSelect, isSelectMode, isCreationMode, onChangeNa
                 }}
             /> 
             :
-            team.name}</TableCell>
+            <Typography onClick={() => setTeamEditing(team.id)}>{team.name}</Typography>}</TableCell>
         
             {/* Team Lead */}
             <TableCell sx={{

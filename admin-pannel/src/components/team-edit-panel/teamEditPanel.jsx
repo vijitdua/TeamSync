@@ -9,6 +9,7 @@ import AddIcon from '@mui/icons-material/Add';
 import dayjs from "dayjs";
 
 function TeamEditPanel({teamEditing, isCreate}) {
+    const [teamName, setTeamName] = useState(teamEditing.name);
     const [teamLead, setTeamLead] = useState(teamEditing.teamLead);
     const [members, setMembers] = useState([]);
     const [foundationDate, setFoundationDate] = useState(isCreate? dayjs(new Date()) : dayjs(teamEditing.foundationDate));
@@ -48,7 +49,7 @@ function TeamEditPanel({teamEditing, isCreate}) {
             <Typography variant="h3">{isCreate ? "Create Team" : "Edit Team"}</Typography>
             <Stack spacing={1}>
                 <Typography>Team Name</Typography>
-                <TextField required></TextField>
+                <TextField required value={teamName} onChange={(e) => setTeamName(e.target.value)}></TextField>
             </Stack>
 
             <Stack spacing={1}>
@@ -73,9 +74,9 @@ function TeamEditPanel({teamEditing, isCreate}) {
 
             <Stack spacing={1}>
                 <Typography>Team Discord</Typography>
-                {/* <Select className="dropdown">
-                    
-                </Select> */}
+                <Select className="dropdown" value="">
+                    <MenuItem value=""></MenuItem>
+                </Select>
             </Stack>
 
             <Stack spacing={1}>

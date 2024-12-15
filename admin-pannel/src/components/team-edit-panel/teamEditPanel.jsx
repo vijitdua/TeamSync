@@ -54,20 +54,20 @@ function TeamEditPanel({teamEditing, isCreate}) {
 
             <Stack spacing={1}>
                 <Typography>Team Leads</Typography>
-                { members.length? teamLead.map((currLead, idx) => {
-                    return(<Select 
+                { members.length? teamLead.map((currLead, idx) =>
+                    <Select 
                         value={currLead.id}
                         className="dropdown" 
                         onChange={(e) => changeTeamLead(idx, e.target.value)}
-                        key={{idx}}
+                        key={idx}
                     >
                         { members.map((member) => 
-                            (<MenuItem key={member.id} value={member.id}>
+                            <MenuItem key={member.id} value={member.id}>
                                 {member.name}
-                            </MenuItem>)
+                            </MenuItem>
                         ) }
-                    </Select>);
-                })
+                    </Select>
+                )
                 :
                 <Typography>Loading...</Typography> }
             </Stack>
@@ -82,7 +82,11 @@ function TeamEditPanel({teamEditing, isCreate}) {
             <Stack spacing={1}>
                 <Typography>Foundation Date</Typography>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker value={foundationDate} onChange={(e) => setFoundationDate(e.$d)}/>
+                    <DatePicker value={foundationDate} onChange={(e) => {
+                        // console.log(foundationDate);
+                        // console.log(e.$d);
+                        setFoundationDate(dayjs(e.$d));
+                    }}/>
                 </LocalizationProvider>
             </Stack>
 

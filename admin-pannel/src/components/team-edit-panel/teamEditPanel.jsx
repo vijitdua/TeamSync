@@ -7,6 +7,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import AddIcon from '@mui/icons-material/Add';
 import dayjs from "dayjs";
+import {v4 as uuidv4} from 'uuid';
 
 function TeamEditPanel({teamEditing, isCreate}) {
     const [teamName, setTeamName] = useState(teamEditing.name);
@@ -21,11 +22,14 @@ function TeamEditPanel({teamEditing, isCreate}) {
     if (teamEditing.customDataPrivate) {
         initCustomData = {...initCustomData, ...teamEditing.customDataPublic};
     }
+    const uniqueCustomData = {};
+    for (let key in initCustomData) {
+        uniqueCustomData[uuidv4()] = [key, initCustomData[key]];
+    }
 
-    const [customData, setCustomData] = useState(initCustomData);
+    const [customData, setCustomData] = useState(uniqueCustomData);
 
     useEffect(() => {
-        console.log(teamEditing);
         console.log(customData);
         const getMembers = async () => {
             const memberIds = await fetchMemberIds();
@@ -37,7 +41,7 @@ function TeamEditPanel({teamEditing, isCreate}) {
             setMembers(newMembers);
         }
         getMembers();
-    }, [teamEditing, customData])
+    }, [customData])
 
     function changeTeamLead(idx, newId) {
         const updatedTeamLead = teamLead.map((lead, index) => 
@@ -47,36 +51,20 @@ function TeamEditPanel({teamEditing, isCreate}) {
     }
 
     function addCustomProperty() {
-        const newCustomData = {...customData};
-        newCustomData[""] = "";
+        let newCustomData = {...customData};
+        newCustomData[uuidv4()] = ["", ""];
+        console.log("new", newCustomData);
         setCustomData(newCustomData);
     }
 
-    function editCustomProperty(e, key) {
+    function editCustomProperty(e, id) {
         const newKey = e.target.form.elements[0].value;
         const newVal = e.target.form.elements[2].value;
 
-        console.log(newKey, newVal);
-        
-        if (newKey !== key) {  // changed property key
-            if (Object.hasOwn(customData, newKey)) {  // custom data already has this key
-                // display error and don't let user sync/save
-            } else {
-                const newCustomData = {};
-                for (let oldKey in customData) {
-                    if (oldKey === key) {
-                        newCustomData[newKey] = customData[oldKey];
-                    } else {
-                        newCustomData[oldKey] = customData[oldKey];
-                    }
-                }
-                setCustomData(newCustomData);
-            }
-        } else {  // changed property value
-            const newCustomData = {...customData};
-            newCustomData[newKey] = newVal;
-            setCustomData(newCustomData);
-        } 
+        const newCustomData = {...customData};
+
+        newCustomData[id] = [newKey, newVal];
+        setCustomData(newCustomData);
     }
 
     return (
@@ -138,11 +126,11 @@ function TeamEditPanel({teamEditing, isCreate}) {
 
             <Divider />
 
-                { Object.entries(customData).map(([key, val]) => 
-                    <Grid2 container key={ key } spacing={1}>
+                { Object.entries(customData).map(([id, pair]) => 
+                    <Grid2 container key={ id } spacing={1}>
                         <form>
-                            <TextField defaultValue={ key } onChange={ (e) => editCustomProperty(e, key) }></TextField>
-                            <TextField defaultValue={ val } onChange={ (e) => editCustomProperty(e, key) }></TextField>
+                            <TextField value={ customData[id][0] } onChange={ (e) => editCustomProperty(e, id) }></TextField>
+                            <TextField value={ customData[id][1] } onChange={ (e) => editCustomProperty(e, id) }></TextField>
                         </form>
                     </Grid2>
                 ) }

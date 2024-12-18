@@ -1,4 +1,4 @@
-import { Button, Divider, MenuItem, Select, Stack, TextField, Typography } from "@mui/material";
+import { Button, Divider, Grid2, MenuItem, Select, Stack, TextField, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import fetchMemberIds from "../../services/fetchMemberIds";
 import fetchMember from "../../services/fetchMember";
@@ -14,7 +14,19 @@ function TeamEditPanel({teamEditing, isCreate}) {
     const [members, setMembers] = useState([]);
     const [foundationDate, setFoundationDate] = useState(isCreate? dayjs(new Date()) : dayjs(teamEditing.foundationDate));
 
+    let initCustomData = {};
+    if (teamEditing.customDataPublic) {
+        initCustomData = {...initCustomData, ...teamEditing.customDataPublic};
+    }
+    if (teamEditing.customDataPrivate) {
+        initCustomData = {...initCustomData, ...teamEditing.customDataPublic};
+    }
+
+    const [customData, setCustomData] = useState(initCustomData);
+
     useEffect(() => {
+        console.log(teamEditing);
+        console.log(customData);
         const getMembers = async () => {
             const memberIds = await fetchMemberIds();
             const newMembers = [];
@@ -25,7 +37,7 @@ function TeamEditPanel({teamEditing, isCreate}) {
             setMembers(newMembers);
         }
         getMembers();
-    }, [])
+    }, [teamEditing, customData])
 
     function changeTeamLead(idx, newId) {
         const updatedTeamLead = teamLead.map((lead, index) => 
@@ -34,11 +46,44 @@ function TeamEditPanel({teamEditing, isCreate}) {
         setTeamLead(updatedTeamLead); 
     }
 
+    function addCustomProperty() {
+        const newCustomData = {...customData};
+        newCustomData[""] = "";
+        setCustomData(newCustomData);
+    }
+
+    function editCustomProperty(e, key) {
+        const newKey = e.target.form.elements[0].value;
+        const newVal = e.target.form.elements[2].value;
+
+        console.log(newKey, newVal);
+        
+        if (newKey !== key) {  // changed property key
+            if (Object.hasOwn(customData, newKey)) {  // custom data already has this key
+                // display error and don't let user sync/save
+            } else {
+                const newCustomData = {};
+                for (let oldKey in customData) {
+                    if (oldKey === key) {
+                        newCustomData[newKey] = customData[oldKey];
+                    } else {
+                        newCustomData[oldKey] = customData[oldKey];
+                    }
+                }
+                setCustomData(newCustomData);
+            }
+        } else {  // changed property value
+            const newCustomData = {...customData};
+            newCustomData[newKey] = newVal;
+            setCustomData(newCustomData);
+        } 
+    }
+
     return (
         <Stack spacing={2} sx={{
             backgroundColor: "white",
             padding: "1rem",
-            width: "24rem",
+            width: "32rem",
             "& input": {
                 height: "0.5rem",
             },
@@ -82,11 +127,7 @@ function TeamEditPanel({teamEditing, isCreate}) {
             <Stack spacing={1}>
                 <Typography>Foundation Date</Typography>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker value={foundationDate} onChange={(e) => {
-                        // console.log(foundationDate);
-                        // console.log(e.$d);
-                        setFoundationDate(dayjs(e.$d));
-                    }}/>
+                    <DatePicker value={foundationDate} onChange={(e) => setFoundationDate(dayjs(e.$d))}/>
                 </LocalizationProvider>
             </Stack>
 
@@ -97,12 +138,24 @@ function TeamEditPanel({teamEditing, isCreate}) {
 
             <Divider />
 
+                { Object.entries(customData).map(([key, val]) => 
+                    <Grid2 container key={ key } spacing={1}>
+                        <form>
+                            <TextField defaultValue={ key } onChange={ (e) => editCustomProperty(e, key) }></TextField>
+                            <TextField defaultValue={ val } onChange={ (e) => editCustomProperty(e, key) }></TextField>
+                        </form>
+                    </Grid2>
+                ) }
+
             <Stack spacing={1}>
                 <Typography>Notes</Typography>
                 <TextField multiline></TextField>
             </Stack>
 
-            <Button variant="outlined"><AddIcon />Add Property</Button>
+            <Button variant="outlined" onClick={ addCustomProperty }>
+                <AddIcon />
+                Add Property
+            </Button>
 
             <Button>Delete Team</Button>
         </Stack>

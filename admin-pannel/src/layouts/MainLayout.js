@@ -67,7 +67,6 @@ function MainLayout({children, teamEditing}){
                 }}>{children}</Container>
                 <Typography variant="body2">developed by Naomi & Vijit @ TeamSync</Typography>
             </Stack>
-            { teamEditing !== null && <TeamEditPanel teamEditing={teamEditing}></TeamEditPanel> }
         </Box>
     );
 }

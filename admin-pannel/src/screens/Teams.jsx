@@ -6,6 +6,7 @@ import AddIcon from '@mui/icons-material/Add';
 import fetchTeams from "../services/fetchTeams";
 import fetchMember from "../services/fetchMember";
 import getMemberIdFromName from "../services/getMemberIdFromName";
+import TeamEditPanel from "../components/team-edit-panel/teamEditPanel";
 
 function Teams() {
     const [selectedTeams, setSelectedTeams] = useState(new Set([]));
@@ -85,80 +86,111 @@ function Teams() {
         return false;
     }
 
+    function saveChanges() {
+        console.log("saving changes...");
+        setTeamEditing(null);
+    }
+
     return (
-        <MainLayout teamEditing={teamEditing}>
-            <Stack spacing={2}>
-                <Grid2 container sx={{
-                    justifyContent: "flex-end",
-                }}>
-                    <Button variant="contained" onClick={() => setTeamEditing({})}>
-                        <Grid2 container spacing={1}>
-                            <AddIcon />
-                            <Typography>Add</Typography>
-                        </Grid2>
-                    </Button>
-                </Grid2>
-                <Table>
-                    <TableHead>
-                        <TableRow sx={{
-                            "& th": {
-                                borderBottom: "1px solid #a9b8ec",
-                            },
-                        }}>
-                            <TableCell/>
-                            <TableCell colSpan={2}><Typography variant="h3">Team</Typography></TableCell>
-                            <TableCell><Typography variant="h3">Team Lead</Typography></TableCell>
-                            <TableCell><Typography variant="h3">Discord Role</Typography></TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        { teamData.map((team, idx) => {
-                            return (
-                                <TeamRow key={idx}
-                                    team={team}
-                                    isSelectMode={isSelectMode}
-                                    isCreationMode={newTeam !== null}
-                                    onToggleSelect={() => toggleSelectTeam(team.id)} 
-                                    onChangeName={changeTeamName}
-                                    onChangeLead={changeTeamLead}
-                                    onCompleteTeam={completeNewTeam}
-                                    setTeamEditing={setTeamEditing}
-                                />
-                            );
-                        }) }
-                        { newTeam === null && <TableRow>
-                            <TableCell colSpan={5} align="center" sx={{
-                                border: "none",
-                                padding: "0.5rem",
+        <Box>
+            <MainLayout teamEditing={teamEditing}>
+                <Stack spacing={2}>
+                    <Grid2 container sx={{
+                        justifyContent: "flex-end",
+                    }}>
+                        <Button variant="contained" onClick={() => setTeamEditing({})}>
+                            <Grid2 container spacing={1}>
+                                <AddIcon />
+                                <Typography>Add</Typography>
+                            </Grid2>
+                        </Button>
+                    </Grid2>
+                    <Table>
+                        <TableHead>
+                            <TableRow sx={{
+                                "& th": {
+                                    borderBottom: "1px solid #a9b8ec",
+                                },
                             }}>
-                                <Container
-                                    onClick={startCreatingTeam}
-                                    sx={{
-                                        backgroundColor: "#bbc8f3",
-                                        borderRadius: "8px",
-                                        height: "3rem",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        cursor: "pointer",
-                                        "&:hover": { backgroundColor: "#abbbee" }
-                                    }}
-                                >
-                                    <Box sx={{
-                                        position: "relative",
-                                        left: "1rem",
-                                    }}>
-                                        <Grid2 container spacing={2}>
-                                            <AddIcon />
-                                            <Typography>Add Team</Typography>
-                                        </Grid2>
-                                    </Box>
-                                </Container>
-                            </TableCell>
-                        </TableRow> }
-                    </TableBody>
-                </Table>
-            </Stack>
-        </MainLayout>
+                                <TableCell/>
+                                <TableCell colSpan={2}><Typography variant="h3">Team</Typography></TableCell>
+                                <TableCell><Typography variant="h3">Team Lead</Typography></TableCell>
+                                <TableCell><Typography variant="h3">Discord Role</Typography></TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            { teamData.map((team, idx) => {
+                                return (
+                                    <TeamRow key={idx}
+                                        team={team}
+                                        isSelectMode={isSelectMode}
+                                        isCreationMode={newTeam !== null}
+                                        onToggleSelect={() => toggleSelectTeam(team.id)}
+                                        onChangeName={changeTeamName}
+                                        onChangeLead={changeTeamLead}
+                                        onCompleteTeam={completeNewTeam}
+                                        setTeamEditing={setTeamEditing}
+                                    />
+                                );
+                            }) }
+                            { newTeam === null && <TableRow>
+                                <TableCell colSpan={5} align="center" sx={{
+                                    border: "none",
+                                    padding: "0.5rem",
+                                }}>
+                                    <Container
+                                        onClick={startCreatingTeam}
+                                        sx={{
+                                            backgroundColor: "#bbc8f3",
+                                            borderRadius: "8px",
+                                            height: "3rem",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            cursor: "pointer",
+                                            "&:hover": { backgroundColor: "#abbbee" }
+                                        }}
+                                    >
+                                        <Box sx={{
+                                            position: "relative",
+                                            left: "1rem",
+                                        }}>
+                                            <Grid2 container spacing={2}>
+                                                <AddIcon />
+                                                <Typography>Add Team</Typography>
+                                            </Grid2>
+                                        </Box>
+                                    </Container>
+                                </TableCell>
+                            </TableRow> }
+                        </TableBody>
+                    </Table>
+                </Stack>
+            </MainLayout>
+            { teamEditing !== null && <Box 
+                sx={{
+                    position: "absolute",
+                    top: "0",
+                    left: "0",
+                    flexGrow: "1",
+                    height: "100vh",
+                    width: "100%",
+                    backgroundColor: "black",
+                    opacity: "50%",
+                }} 
+                onClick={() => {
+                    saveChanges();
+                }}
+            />}
+            { teamEditing !== null && <Box sx={{
+                    position: "absolute",
+                    top: "0",
+                    right: "0",
+                    width: "24rem",
+                    height: "100vh",
+                }}>
+                    <TeamEditPanel teamEditing={teamEditing} saveChanges={saveChanges}></TeamEditPanel>
+            </Box> }
+        </Box>
     );
 }
 

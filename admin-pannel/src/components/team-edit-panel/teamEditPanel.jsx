@@ -9,7 +9,7 @@ import AddIcon from '@mui/icons-material/Add';
 import dayjs from "dayjs";
 import {v4 as uuidv4} from 'uuid';
 
-function TeamEditPanel({teamEditing, isCreate}) {
+function TeamEditPanel({teamEditing, isCreate, saveChanges}) {
     const [teamName, setTeamName] = useState(teamEditing.name);
     const [teamLead, setTeamLead] = useState(teamEditing.teamLead);
     const [members, setMembers] = useState([]);
@@ -71,7 +71,8 @@ function TeamEditPanel({teamEditing, isCreate}) {
         <Stack spacing={2} sx={{
             backgroundColor: "white",
             padding: "1rem",
-            width: "32rem",
+            height: "100vh",
+            overflow: "auto",
             "& input": {
                 height: "0.5rem",
             },
@@ -79,7 +80,17 @@ function TeamEditPanel({teamEditing, isCreate}) {
                 height: "2.5rem",
             },
         }}>
-            <Typography variant="h3">{isCreate ? "Create Team" : "Edit Team"}</Typography>
+            <Grid2 container spacing={1} sx={{
+                alignItems: "center",
+                justifyContent: "space-between",
+            }}>
+                <Grid2>
+                    <Typography variant="h3">{isCreate ? "Create Team" : "Edit Team"}</Typography>
+                </Grid2>
+                <Grid2>
+                    <Button variant="outlined" onClick={saveChanges}>Save Changes</Button>
+                </Grid2>
+            </Grid2>
             <Stack spacing={1}>
                 <Typography>Team Name</Typography>
                 <TextField required value={teamName} onChange={(e) => setTeamName(e.target.value)}></TextField>
@@ -126,28 +137,29 @@ function TeamEditPanel({teamEditing, isCreate}) {
 
             <Divider />
 
-                { Object.entries(customData).map(([id, pair]) => 
-                        <form key={ id }>
-                            <Grid2 container spacing={1}>
-                                <TextField value={ pair[0] } onChange={ (e) => editCustomProperty(e, id) } sx={{
-                                    width: "45%",
-                                }}></TextField>
-                                <TextField value={ pair[1] } onChange={ (e) => editCustomProperty(e, id) } sx={{
-                                    width: "45%",
-                                }}></TextField>
-                            </Grid2>
-                        </form>
-                ) }
+            { Object.entries(customData).map(([id, pair]) => 
+                    <form key={ id }>
+                        <Grid2 container spacing={1} sx={{
+                            display: "flex",
+                            "& .attributeInput": {
+                                flex: "1",
+                            },
+                        }}>
+                            <TextField value={ pair[0] } onChange={ (e) => editCustomProperty(e, id) } className="attributeInput"></TextField>
+                            <TextField value={ pair[1] } onChange={ (e) => editCustomProperty(e, id) } className="attributeInput"></TextField>
+                        </Grid2>
+                    </form>
+            ) }
+            
+            <Button variant="outlined" onClick={ addCustomProperty }>
+                <AddIcon />
+                Add Property
+            </Button>
 
             <Stack spacing={1}>
                 <Typography>Notes</Typography>
                 <TextField multiline></TextField>
             </Stack>
-
-            <Button variant="outlined" onClick={ addCustomProperty }>
-                <AddIcon />
-                Add Property
-            </Button>
 
             <Button>Delete Team</Button>
         </Stack>

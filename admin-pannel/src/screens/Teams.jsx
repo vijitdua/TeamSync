@@ -41,6 +41,10 @@ function Teams() {
         getTeams();
     }, []);
 
+    useEffect(() => {
+        console.log("teamEditing changed");
+    }, [teamEditing])
+
     function toggleSelectTeam(teamID) {
         const newSelected = selectedTeams;
         if (newSelected.has(teamID)) {
@@ -97,13 +101,12 @@ function Teams() {
     }
 
     function saveChanges() {
-        const newTeamData = teamData;
+        const newTeamData = [...teamData];
         for (let i = 0; i < newTeamData.length; i++) {  // iterate through teamData
             if (newTeamData[i].id === teamEditing.id) {
                 newTeamData[i] = teamEditing;
             }
         }
-        console.log(newTeamData);
         setTeamData(newTeamData);
         setTeamEditing(null);
     }

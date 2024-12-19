@@ -59,15 +59,24 @@ function TeamEditPanel({teamEditing, setTeamEditing, isCreate, saveChanges, setU
     }, [])
 
     /**
-     * 
+     * TODO: error checking...
      * @param {uuid} idx 
      * @param {uuid} newId 
      */
     function changeTeamLead(idx, newId) {
-        const updatedTeamLead = teamLead.map((lead, index) => 
-            index === idx ? { ...lead, id: newId } : lead
-        );
-        setTeamLead(updatedTeamLead); 
+        let newLeadMember = {};
+        for (let j = 0; j < members.length; j ++) {
+            if (members[j].id === newId) {
+                newLeadMember = members[j];
+            }
+        }
+        const updatedTeamLead = [...teamLead];
+        for (let i = 0; i < teamLead.length; i ++) {
+            if (i === idx) {
+                updatedTeamLead[i] = newLeadMember;
+            }
+        }
+        setTeamLead(updatedTeamLead);
         setUnsavedChanges(true);
     }
 

@@ -1,14 +1,15 @@
-import axios from "axios";
-import {env} from "../config/env";
+import axios from 'axios';
+import { env } from '../config/env.js';
 
-// catch the error this creates, and update the UI in the function that calls it instead. Also update this to have better doc comments
-async function login({username, password}) {
+// Function to log into the backend
+// called from login screen.
+async function auth(username, password) {
     try {
         const response = await axios.post(
             `${env.backendURL}/auth/login`,
             {
                 username,
-                password
+                password,
             },
             {
                 withCredentials: true // Ensure cookies are handled
@@ -16,12 +17,13 @@ async function login({username, password}) {
         );
 
         if (response.status === 200) {
-            // Successful login, return true? maybe true on success and throw error always otherwise
             return true;
         } else {
-            // throw an error
+            throw Error("Unsuccessful login.");
         }
     } catch (error) {
         throw error;
     }
 }
+
+export { auth };

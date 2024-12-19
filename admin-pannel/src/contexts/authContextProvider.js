@@ -25,7 +25,10 @@ export function AuthProvider({ children }) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // TODO: ADD A CODE HERE THAT FETCHES SESSION COOKIE, CHECK IF IT EXISTS. AND THEN CHANGED LOGGED IN TO REPRESENT IF AUTHENTICATED OR NOT. AND THEN MODIFY LOADING TO FALSE WHEN FINISHED
+        // todo: check for cookie and force login if needed
+        
+        setIsLoggedIn(true);  // change manually for development
+        setLoading(false);
     }, []);
 
     const value = {isLoggedIn};

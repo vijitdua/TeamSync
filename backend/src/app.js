@@ -21,8 +21,8 @@ app.use(globalRateLimit);
 
 const corsOptions={
     // Disable COR origin during testing
-    // origin: env.corsOrigin,
-    // credentials: true, // Allows sending Cookies for authentication
+    origin: env.corsOrigin,
+    credentials: true, // Allows sending Cookies for authentication
     optionsSuccessStatus: 200 // avoid 204 choke.
 };
 

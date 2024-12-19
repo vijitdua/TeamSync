@@ -12,6 +12,18 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import dayjs from "dayjs";
 import {v4 as uuidv4} from 'uuid';
 
+/**
+ * TODO
+ * - sync with backend (save data)
+ * - snackbar for notifications and errors
+ * - Team logo upload
+ * - Stars for required fields
+ * - Prompt text for inputs
+ */
+
+/**
+ * pop-up at right side of screen when editing a team in team view
+ */
 function TeamEditPanel({teamEditing, isCreate, saveChanges}) {
     const [teamName, setTeamName] = useState(teamEditing.name);
     const [teamLead, setTeamLead] = useState(teamEditing.teamLead);
@@ -36,6 +48,10 @@ function TeamEditPanel({teamEditing, isCreate, saveChanges}) {
 
     const [customData, setCustomData] = useState(uniqueCustomData);
 
+    /**
+     * run when component is rendered
+     * get members list from backend for team lead drop-downs
+     */
     useEffect(() => {
         console.log(customData);
         const getMembers = async () => {
@@ -50,6 +66,11 @@ function TeamEditPanel({teamEditing, isCreate, saveChanges}) {
         getMembers();
     }, [customData])
 
+    /**
+     * 
+     * @param {uuid} idx 
+     * @param {uuid} newId 
+     */
     function changeTeamLead(idx, newId) {
         const updatedTeamLead = teamLead.map((lead, index) => 
             index === idx ? { ...lead, id: newId } : lead
@@ -57,12 +78,20 @@ function TeamEditPanel({teamEditing, isCreate, saveChanges}) {
         setTeamLead(updatedTeamLead); 
     }
 
+    /**
+     * Add a new custom property to this team.
+     */
     function addCustomProperty() {
         let newCustomData = {...customData};
         newCustomData[uuidv4()] = {key: "", value: "", visibility: "private"};
         setCustomData(newCustomData);
     }
 
+    /**
+     * Edit a custom property.
+     * @param {Event} e: The event from button click
+     * @param {UUID} id: ID of the property 
+     */
     function editCustomProperty(e, id) {
         const newKey = e.target.form.elements[1].value;
         const newVal = e.target.form.elements[3].value;
@@ -74,6 +103,10 @@ function TeamEditPanel({teamEditing, isCreate, saveChanges}) {
         setCustomData(newCustomData);
     }
 
+    /**
+     * Change the visibility of a custom property.
+     * @param {UUID} id 
+     */
     function toggleVisibility(id) {
         const newCustomData = {...customData};
         if (newCustomData[id].visibility === "public") {
@@ -84,6 +117,10 @@ function TeamEditPanel({teamEditing, isCreate, saveChanges}) {
         setCustomData(newCustomData);
     }
 
+    /**
+     * Delete a custom property.
+     * @param {UUID} id 
+     */
     function deleteAttribute(id) {
         const newCustomData = {...customData};
         delete newCustomData[id];

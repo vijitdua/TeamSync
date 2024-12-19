@@ -1,4 +1,4 @@
-import { Box, Button, Divider, Grid2, MenuItem, Select, Stack, TextField, Typography } from "@mui/material";
+import { Box, Button, Divider, Grid2, InputLabel, MenuItem, Select, Stack, TextField, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import fetchMemberIds from "../../services/fetchMemberIds";
 import fetchMember from "../../services/fetchMember";
@@ -11,15 +11,6 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import DeleteIcon from '@mui/icons-material/Delete';
 import dayjs from "dayjs";
 import {v4 as uuidv4} from 'uuid';
-
-/**
- * TODO
- * - sync with backend (save data)
- * - snackbar for notifications and errors
- * - Team logo upload
- * - Stars for required fields
- * - Prompt text for inputs
- */
 
 /**
  * pop-up at right side of screen when editing a team in team view
@@ -151,48 +142,50 @@ function TeamEditPanel({teamEditing, isCreate, saveChanges}) {
                     <Button variant="outlined" onClick={saveChanges}>Save Changes</Button>
                 </Grid2>
             </Grid2>
-            <Stack spacing={1}>
-                <Typography>Team Name</Typography>
-                <TextField required value={teamName} onChange={(e) => setTeamName(e.target.value)}></TextField>
+            <Stack spacing={0}>
+                <InputLabel htmlFor="team-name" sx={{ color: "black" }}>Name</InputLabel>
+                <TextField id="team-name" required value={teamName} onChange={(e) => setTeamName(e.target.value)}></TextField>
             </Stack>
 
             <Stack spacing={1}>
-                <Typography>Team Leads</Typography>
-                { members.length? teamLead.map((currLead, idx) =>
-                    <Select 
-                        value={currLead.id}
-                        className="dropdown" 
-                        onChange={(e) => changeTeamLead(idx, e.target.value)}
-                        key={idx}
-                    >
-                        { members.map((member) => 
-                            <MenuItem key={member.id} value={member.id}>
-                                {member.name}
-                            </MenuItem>
-                        ) }
-                    </Select>
-                )
-                :
-                <Typography>Loading...</Typography> }
+                <InputLabel sx={{ color: "black" }}>Team Leads</InputLabel>
+                <Stack spacing={1} id="team-leads">
+                    { members.length? teamLead.map((currLead, idx) =>
+                        <Select
+                            value={currLead.id}
+                            className="dropdown"
+                            onChange={(e) => changeTeamLead(idx, e.target.value)}
+                            key={idx}
+                        >
+                            { members.map((member) =>
+                                <MenuItem key={member.id} value={member.id}>
+                                    {member.name}
+                                </MenuItem>
+                            ) }
+                        </Select>
+                    )
+                    :
+                    <Typography>Loading...</Typography> }
+                </Stack>
             </Stack>
 
             <Stack spacing={1}>
-                <Typography>Team Discord</Typography>
+                <InputLabel sx={{ color: "black" }}>Team Discord</InputLabel>
                 <Select className="dropdown" value="">
                     <MenuItem value=""></MenuItem>
                 </Select>
             </Stack>
 
             <Stack spacing={1}>
-                <Typography>Foundation Date</Typography>
+                <InputLabel sx={{ color: "black" }}>Foundation Date</InputLabel>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DatePicker value={foundationDate} onChange={(e) => setFoundationDate(dayjs(e.$d))}/>
                 </LocalizationProvider>
             </Stack>
 
             <Stack spacing={1}>
-                <Typography>Description</Typography>
-                <TextField multiline></TextField>
+                <InputLabel htmlFor="team-description" sx={{ color: "black" }}>Description</InputLabel>
+                <TextField multiline id="team-description"></TextField>
             </Stack>
 
             <Divider />
@@ -238,8 +231,8 @@ function TeamEditPanel({teamEditing, isCreate, saveChanges}) {
             </Button>
 
             <Stack spacing={1}>
-                <Typography>Notes</Typography>
-                <TextField multiline></TextField>
+                <InputLabel htmlFor="team-notes" sx={{ color: "black" }}>Notes</InputLabel>
+                <TextField multiline id="team-notes"></TextField>
             </Stack>
 
             <Button>Delete Team</Button>

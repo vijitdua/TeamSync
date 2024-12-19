@@ -42,7 +42,7 @@ function TeamRow({ team, onToggleSelect, isSelectMode, isCreationMode, onChangeN
             <TableCell align="center" sx={{
                 width: "4rem",
             }}>
-                <Checkbox onChange={ toggleSelect } sx={{
+                <Checkbox onChange={ toggleSelect } id={`checkbox-${team.id}`} sx={{
                     display: (isHovered || isSelectMode)? "inline" : "none",
                 }}></Checkbox>
             </TableCell>

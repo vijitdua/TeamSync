@@ -8,6 +8,15 @@ import fetchMember from "../services/fetchMember";
 import getMemberIdFromName from "../services/getMemberIdFromName";
 import TeamEditPanel from "../components/team-edit-panel/teamEditPanel";
 
+/**
+ * TODO
+ * - sync with backend (save data)
+ * - snackbar for notifications and errors
+ * - Team logo upload
+ * - Prompt text for inputs
+ * - Edit menu from add button
+ */
+
 function Teams() {
     const [selectedTeams, setSelectedTeams] = useState(new Set([]));
     const [teamData, setTeamData] = useState([]);

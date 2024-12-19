@@ -7,6 +7,7 @@ import fetchTeams from "../services/fetchTeams";
 import fetchMember from "../services/fetchMember";
 import getMemberIdFromName from "../services/getMemberIdFromName";
 import TeamEditPanel from "../components/team-edit-panel/teamEditPanel";
+import { useGlobalSnackbar } from "../contexts/globalFeedbackSnackbarProvider";
 
 /**
  * TODO
@@ -25,7 +26,11 @@ function Teams() {
     const [teamEditing, setTeamEditing] = useState(null);
     const [unsavedChanges, setUnsavedChanges] = useState(false);
 
+    const snackbar = useGlobalSnackbar();
+
     useEffect(() => {
+        console.log("hi");
+        
         const getTeams = async () => {
             const teamData = await fetchTeams();
             for (let team of teamData) {
@@ -78,22 +83,32 @@ function Teams() {
     }
 
     async function completeNewTeam() {
-        if (newTeam !== null && newTeam.hasOwnProperty("teamLead") && newTeam.teamLead[0] !== "" && newTeam.name) {
-            const teamLeadId = await getMemberIdFromName(newTeam.teamLead[0]);
-            if (teamLeadId === null) {
-                console.log("didn't find lead name");
-                return false;
-            };
-            const nextTeam = newTeam;
-            nextTeam.teamLead[0] = teamLeadId;
-            const newTeams = teamData;
-            newTeams[newTeams.length - 1] = nextTeam;
-            setTeamData(newTeams);
-            setNewTeam(null);
-            console.log(newTeams);
-            return true;
+        console.log(newTeam);
+        if (newTeam === null) {
+            snackbar.enqueueAlertFeedbackSnackbar("Unknown error-- tried to complete new team when new team wasn't initialized");
+            return false;
         }
-        return false;
+        if (!newTeam.name) {
+            snackbar.enqueueAlertFeedbackSnackbar("Must enter team name.");
+            return false;
+        }
+        if (!newTeam.teamLead || newTeam.teamLead[0] === "") {
+            snackbar.enqueueAlertFeedbackSnackbar("Must enter one team lead name.");
+            return false;
+        }
+        const teamLeadId = await getMemberIdFromName(newTeam.teamLead[0]);
+        if (teamLeadId === null) {
+            snackbar.enqueueAlertFeedbackSnackbar(`Could not find member named ${newTeam.teamLead[0]}.`);
+            return false;
+        };
+        const nextTeam = newTeam;
+        nextTeam.teamLead[0] = teamLeadId;
+        const newTeams = teamData;
+        newTeams[newTeams.length - 1] = nextTeam;
+        setTeamData(newTeams);
+        setNewTeam(null);
+        snackbar.enqueueSuccessFeedbackSnackbar("Successfully created team.", 3000);
+        return true;
     }
 
     function saveChanges() {

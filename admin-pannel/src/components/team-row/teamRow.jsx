@@ -64,17 +64,6 @@ function TeamRow({ team, onToggleSelect, isSelectMode, isCreationMode, onChangeN
                         attemptCompleteTeam();
                     }
                 }}
-                onFocus={() => {
-                    focusField.current = 1;
-                }}
-                onBlur={() => {
-                    focusField.current = 0;
-                    setTimeout(() => {
-                        if (focusField.current === 0) {
-                            attemptCompleteTeam();
-                        }
-                    }, 0);
-                }}
             /> 
             :
             <Typography onClick={() => setTeamEditing(team)}>{team.name}</Typography>}</TableCell>
@@ -90,17 +79,6 @@ function TeamRow({ team, onToggleSelect, isSelectMode, isCreationMode, onChangeN
                             if (e.key === "Enter") {
                                 attemptCompleteTeam();
                             }
-                        }}
-                        onFocus={() => {
-                            focusField.current = 2;
-                        }}
-                        onBlur={() => {
-                            focusField.current = 0;
-                            setTimeout(async () => {
-                                if (focusField.current === 0) {
-                                    attemptCompleteTeam();
-                                }
-                            }, 0);
                         }}
                     />
                     :

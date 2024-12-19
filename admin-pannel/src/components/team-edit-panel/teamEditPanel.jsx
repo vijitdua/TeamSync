@@ -1,4 +1,4 @@
-import { Button, Divider, Grid2, MenuItem, Select, Stack, TextField, Typography } from "@mui/material";
+import { Box, Button, Divider, Grid2, MenuItem, Select, Stack, TextField, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import fetchMemberIds from "../../services/fetchMemberIds";
 import fetchMember from "../../services/fetchMember";
@@ -6,6 +6,9 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import AddIcon from '@mui/icons-material/Add';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import DeleteIcon from '@mui/icons-material/Delete';
 import dayjs from "dayjs";
 import {v4 as uuidv4} from 'uuid';
 
@@ -15,16 +18,20 @@ function TeamEditPanel({teamEditing, isCreate, saveChanges}) {
     const [members, setMembers] = useState([]);
     const [foundationDate, setFoundationDate] = useState(isCreate? dayjs(new Date()) : dayjs(teamEditing.foundationDate));
 
-    let initCustomData = {};
-    if (teamEditing.customDataPublic) {
-        initCustomData = {...initCustomData, ...teamEditing.customDataPublic};
-    }
-    if (teamEditing.customDataPrivate) {
-        initCustomData = {...initCustomData, ...teamEditing.customDataPublic};
-    }
     const uniqueCustomData = {};
-    for (let key in initCustomData) {
-        uniqueCustomData[uuidv4()] = [key, initCustomData[key]];
+    for (let key in teamEditing.customDataPublic) {
+        uniqueCustomData[uuidv4()] = {
+            key: key, 
+            value: teamEditing.customDataPublic[key],
+            visibility: "public",
+        };
+    }
+    for (let key in teamEditing.customDataPrivate) {
+        uniqueCustomData[uuidv4()] = {
+            key: key, 
+            value: teamEditing.customDataPrivate[key],
+            visibility: "private",
+        };
     }
 
     const [customData, setCustomData] = useState(uniqueCustomData);
@@ -52,18 +59,34 @@ function TeamEditPanel({teamEditing, isCreate, saveChanges}) {
 
     function addCustomProperty() {
         let newCustomData = {...customData};
-        newCustomData[uuidv4()] = ["", ""];
-        console.log("new", newCustomData);
+        newCustomData[uuidv4()] = {key: "", value: "", visibility: "private"};
         setCustomData(newCustomData);
     }
 
     function editCustomProperty(e, id) {
-        const newKey = e.target.form.elements[0].value;
-        const newVal = e.target.form.elements[2].value;
+        const newKey = e.target.form.elements[1].value;
+        const newVal = e.target.form.elements[3].value;
 
         const newCustomData = {...customData};
 
-        newCustomData[id] = [newKey, newVal];
+        newCustomData[id].key = newKey;
+        newCustomData[id].value = newVal;
+        setCustomData(newCustomData);
+    }
+
+    function toggleVisibility(id) {
+        const newCustomData = {...customData};
+        if (newCustomData[id].visibility === "public") {
+            newCustomData[id].visibility = "private";
+        } else {
+            newCustomData[id].visibility = "public";
+        }
+        setCustomData(newCustomData);
+    }
+
+    function deleteAttribute(id) {
+        const newCustomData = {...customData};
+        delete newCustomData[id];
         setCustomData(newCustomData);
     }
 
@@ -144,9 +167,30 @@ function TeamEditPanel({teamEditing, isCreate, saveChanges}) {
                             "& .attributeInput": {
                                 flex: "1",
                             },
+                            alignItems: "center",
                         }}>
-                            <TextField value={ pair[0] } onChange={ (e) => editCustomProperty(e, id) } className="attributeInput"></TextField>
-                            <TextField value={ pair[1] } onChange={ (e) => editCustomProperty(e, id) } className="attributeInput"></TextField>
+                            <Box component="button" sx={{
+                                backgroundColor: "transparent",
+                                border: "none",
+                                cursor: "pointer",
+                            }} onClick={(e) => {
+                                e.preventDefault();
+                                toggleVisibility(id);
+                            }}>
+                                { pair.visibility === "public" ? <VisibilityIcon/> : <VisibilityOffIcon/>}
+                            </Box>
+                            <TextField value={ pair.key } onChange={ (e) => editCustomProperty(e, id) } className="attributeInput"></TextField>
+                            <TextField value={ pair.value } onChange={ (e) => editCustomProperty(e, id) } className="attributeInput"></TextField>
+                            <Box component="button" sx={{
+                                backgroundColor: "transparent",
+                                border: "none",
+                                cursor: "pointer",
+                            }} onClick={(e) => {
+                                e.preventDefault();
+                                deleteAttribute(id);
+                            }}>
+                                <DeleteIcon/>
+                            </Box>
                         </Grid2>
                     </form>
             ) }

@@ -1,4 +1,4 @@
-import { Box, Checkbox, Grid2, TableCell, TableRow, TextField, Typography } from "@mui/material";
+import { Box, Button, Checkbox, Grid2, TableCell, TableRow, TextField, Typography } from "@mui/material";
 import { useRef, useState } from "react";
 
 
@@ -99,10 +99,13 @@ function TeamRow({ team, onToggleSelect, isSelectMode, isCreationMode, onChangeN
                 </Grid2>
             </TableCell>
 
-            {/* Discord Role */}
             <TableCell sx={{
                 borderRight: "none",
             }}>
+                {/* Confirmation button for creating team */}
+                { isCreating && <Button variant="contained" onClick={ attemptCompleteTeam }>Confirm New Team</Button>}
+
+                {/* Discord Role */}
                 <Typography>{team.discordId}</Typography>
             </TableCell>
         </TableRow>

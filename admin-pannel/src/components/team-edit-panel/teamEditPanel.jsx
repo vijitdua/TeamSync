@@ -15,11 +15,13 @@ import {v4 as uuidv4} from 'uuid';
 /**
  * pop-up at right side of screen when editing a team in team view
  */
-function TeamEditPanel({teamEditing, isCreate, saveChanges}) {
+function TeamEditPanel({teamEditing, setTeamEditing, isCreate, saveChanges, setUnsavedChanges}) {
     const [teamName, setTeamName] = useState(teamEditing.name);
     const [teamLead, setTeamLead] = useState(teamEditing.teamLead);
     const [members, setMembers] = useState([]);
     const [foundationDate, setFoundationDate] = useState(isCreate? dayjs(new Date()) : dayjs(teamEditing.foundationDate));
+    const [description, setDescription] = useState(teamEditing.description !== null ? teamEditing.description : "");
+    const [notes, setNotes] = useState(teamEditing.notes);
 
     const uniqueCustomData = {};
     for (let key in teamEditing.customDataPublic) {
@@ -44,7 +46,6 @@ function TeamEditPanel({teamEditing, isCreate, saveChanges}) {
      * get members list from backend for team lead drop-downs
      */
     useEffect(() => {
-        console.log(customData);
         const getMembers = async () => {
             const memberIds = await fetchMemberIds();
             const newMembers = [];
@@ -55,7 +56,7 @@ function TeamEditPanel({teamEditing, isCreate, saveChanges}) {
             setMembers(newMembers);
         }
         getMembers();
-    }, [customData])
+    }, [])
 
     /**
      * 
@@ -67,6 +68,7 @@ function TeamEditPanel({teamEditing, isCreate, saveChanges}) {
             index === idx ? { ...lead, id: newId } : lead
         );
         setTeamLead(updatedTeamLead); 
+        setUnsavedChanges(true);
     }
 
     /**
@@ -76,6 +78,7 @@ function TeamEditPanel({teamEditing, isCreate, saveChanges}) {
         let newCustomData = {...customData};
         newCustomData[uuidv4()] = {key: "", value: "", visibility: "private"};
         setCustomData(newCustomData);
+        setUnsavedChanges(true);
     }
 
     /**
@@ -92,6 +95,7 @@ function TeamEditPanel({teamEditing, isCreate, saveChanges}) {
         newCustomData[id].key = newKey;
         newCustomData[id].value = newVal;
         setCustomData(newCustomData);
+        setUnsavedChanges(true);
     }
 
     /**
@@ -106,6 +110,7 @@ function TeamEditPanel({teamEditing, isCreate, saveChanges}) {
             newCustomData[id].visibility = "public";
         }
         setCustomData(newCustomData);
+        setUnsavedChanges(true);
     }
 
     /**
@@ -116,6 +121,33 @@ function TeamEditPanel({teamEditing, isCreate, saveChanges}) {
         const newCustomData = {...customData};
         delete newCustomData[id];
         setCustomData(newCustomData);
+        setUnsavedChanges(true);
+    }
+
+    function updateTeamEditing() {
+        const newTeamEditing = {...teamEditing};
+        newTeamEditing.name = teamName;
+        newTeamEditing.foundationDate = foundationDate;  // TODO: convert this to javascript date
+        newTeamEditing.teamLead = teamLead;
+        
+        const customDataPublic = {};
+        const customDataPrivate = {};
+        for (let id in customData) {
+            if (customData[id].visibility === "public") {
+                customDataPublic[customData[id].key] = customData[id].value;
+            } else {
+                customDataPrivate[customData[id].key] = customData[id].value;
+            }
+        }
+
+        newTeamEditing.customDataPublic = customDataPublic;
+        newTeamEditing.customDataPrivate = customDataPrivate;
+        newTeamEditing.updatedAt = new Date();
+        newTeamEditing.notes = notes;
+        newTeamEditing.description = description;
+
+        setTeamEditing(newTeamEditing);
+        setUnsavedChanges(false);
     }
 
     return (
@@ -139,12 +171,15 @@ function TeamEditPanel({teamEditing, isCreate, saveChanges}) {
                     <Typography variant="h3">{isCreate ? "Create Team" : "Edit Team"}</Typography>
                 </Grid2>
                 <Grid2>
-                    <Button variant="outlined" onClick={saveChanges}>Save Changes</Button>
+                    <Button variant="outlined" onClick={ updateTeamEditing }>Save Changes</Button>
                 </Grid2>
             </Grid2>
             <Stack spacing={0}>
                 <InputLabel htmlFor="team-name" sx={{ color: "black" }} required>Name</InputLabel>
-                <TextField id="team-name" required value={teamName} onChange={(e) => setTeamName(e.target.value)}></TextField>
+                <TextField id="team-name" required value={teamName} onChange={(e) => {
+                    setTeamName(e.target.value);
+                    setUnsavedChanges(true);
+                }}></TextField>
             </Stack>
 
             <Stack spacing={1}>
@@ -185,7 +220,10 @@ function TeamEditPanel({teamEditing, isCreate, saveChanges}) {
 
             <Stack spacing={1}>
                 <InputLabel htmlFor="team-description" sx={{ color: "black" }}>Description</InputLabel>
-                <TextField multiline id="team-description"></TextField>
+                <TextField multiline id="team-description" value={description} onChange={(e) => {
+                    setDescription(e.target.value);
+                    setUnsavedChanges(true);
+                }}></TextField>
             </Stack>
 
             <Divider />
@@ -232,7 +270,10 @@ function TeamEditPanel({teamEditing, isCreate, saveChanges}) {
 
             <Stack spacing={1}>
                 <InputLabel htmlFor="team-notes" sx={{ color: "black" }}>Notes</InputLabel>
-                <TextField multiline id="team-notes"></TextField>
+                <TextField multiline id="team-notes" value={notes} onChange={(e) => {
+                    setNotes(e.target.value);
+                    setUnsavedChanges(true);
+                }}></TextField>
             </Stack>
 
             <Button>Delete Team</Button>

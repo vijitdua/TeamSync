@@ -23,6 +23,7 @@ function Teams() {
     const [isSelectMode, setIsSelectMode] = useState(false);
     const [newTeam, setNewTeam] = useState(null);
     const [teamEditing, setTeamEditing] = useState(null);
+    const [unsavedChanges, setUnsavedChanges] = useState(false);
 
     useEffect(() => {
         const getTeams = async () => {
@@ -96,7 +97,14 @@ function Teams() {
     }
 
     function saveChanges() {
-        console.log("saving changes...");
+        const newTeamData = teamData;
+        for (let i = 0; i < newTeamData.length; i++) {  // iterate through teamData
+            if (newTeamData[i].id === teamEditing.id) {
+                newTeamData[i] = teamEditing;
+            }
+        }
+        console.log(newTeamData);
+        setTeamData(newTeamData);
         setTeamEditing(null);
     }
 
@@ -187,7 +195,9 @@ function Teams() {
                     opacity: "50%",
                 }} 
                 onClick={() => {
-                    saveChanges();
+                    if (!unsavedChanges) {
+                        saveChanges();
+                    }
                 }}
             />}
             { teamEditing !== null && <Box sx={{
@@ -197,7 +207,7 @@ function Teams() {
                     width: "24rem",
                     height: "100vh",
                 }}>
-                    <TeamEditPanel teamEditing={teamEditing} saveChanges={saveChanges}></TeamEditPanel>
+                    <TeamEditPanel teamEditing={teamEditing} setTeamEditing={setTeamEditing} saveChanges={saveChanges} setUnsavedChanges={setUnsavedChanges}></TeamEditPanel>
             </Box> }
         </Box>
     );

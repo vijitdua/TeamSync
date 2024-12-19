@@ -127,12 +127,16 @@ function TeamEditPanel({teamEditing, isCreate}) {
             <Divider />
 
                 { Object.entries(customData).map(([id, pair]) => 
-                    <Grid2 container key={ id } spacing={1}>
-                        <form>
-                            <TextField value={ customData[id][0] } onChange={ (e) => editCustomProperty(e, id) }></TextField>
-                            <TextField value={ customData[id][1] } onChange={ (e) => editCustomProperty(e, id) }></TextField>
+                        <form key={ id }>
+                            <Grid2 container spacing={1}>
+                                <TextField value={ pair[0] } onChange={ (e) => editCustomProperty(e, id) } sx={{
+                                    width: "45%",
+                                }}></TextField>
+                                <TextField value={ pair[1] } onChange={ (e) => editCustomProperty(e, id) } sx={{
+                                    width: "45%",
+                                }}></TextField>
+                            </Grid2>
                         </form>
-                    </Grid2>
                 ) }
 
             <Stack spacing={1}>

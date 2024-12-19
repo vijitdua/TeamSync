@@ -12,17 +12,20 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import CloseIcon from '@mui/icons-material/Close';
 import dayjs from "dayjs";
 import {v4 as uuidv4} from 'uuid';
+import { useGlobalSnackbar } from "../../contexts/globalFeedbackSnackbarProvider";
 
 /**
  * pop-up at right side of screen when editing a team in team view
  */
-function TeamEditPanel({teamEditing, setTeamEditing, isCreate, saveChanges, setUnsavedChanges}) {
+function TeamEditPanel({teamEditing, setTeamEditing, teamData, isCreate, saveChanges, setUnsavedChanges}) {
     const [teamName, setTeamName] = useState(teamEditing.name);
     const [teamLead, setTeamLead] = useState(teamEditing.teamLead);
     const [members, setMembers] = useState([]);
     const [foundationDate, setFoundationDate] = useState(isCreate? dayjs(new Date()) : dayjs(teamEditing.foundationDate));
     const [description, setDescription] = useState(teamEditing.description !== null ? teamEditing.description : "");
     const [notes, setNotes] = useState(teamEditing.notes);
+
+    const snackbar = useGlobalSnackbar();
 
     const uniqueCustomData = {};
     for (let key in teamEditing.customDataPublic) {
@@ -57,7 +60,9 @@ function TeamEditPanel({teamEditing, setTeamEditing, isCreate, saveChanges, setU
             setMembers(newMembers);
         }
         getMembers();
-    }, [])
+    }, []);
+
+    
 
     /**
      * TODO: error checking...
@@ -70,6 +75,10 @@ function TeamEditPanel({teamEditing, setTeamEditing, isCreate, saveChanges, setU
             if (members[j].id === newId) {
                 newLeadMember = members[j];
             }
+        }
+        if (Object.keys(newLeadMember).length === 0) {
+            snackbar.enqueueAlertFeedbackSnackbar(`Unknown error: couldn't find member with id ${newId}`);
+            return;
         }
         const updatedTeamLead = [...teamLead];
         for (let i = 0; i < teamLead.length; i ++) {
@@ -134,20 +143,41 @@ function TeamEditPanel({teamEditing, setTeamEditing, isCreate, saveChanges, setU
         setUnsavedChanges(true);
     }
 
-    function updateTeamEditing() {
+    /**
+     * Update the team that is currently being edited stored in teamEditing.
+     * This is called when the "Save Changes" button of the panel is clicked.
+     */
+    function updateTeam() {
         const newTeamEditing = {...teamEditing};
         newTeamEditing.name = teamName;
-        newTeamEditing.foundationDate = foundationDate;  // TODO: convert this to javascript date
+
+        // check if team name has already been used
+        for (let i = 0; i < teamData.length; i ++) {
+            if (teamData[i].name === teamName && teamData[i].id !== newTeamEditing.id) {
+                snackbar.enqueueAlertFeedbackSnackbar("Team name already used.");
+                return;
+            }
+        }
+
+        newTeamEditing.foundationDate = foundationDate.toDate();  // convert to JavaScript date
         newTeamEditing.teamLead = teamLead;
+
+        const customDataKeySet = new Set([]);
         
         const customDataPublic = {};
         const customDataPrivate = {};
+
         for (let id in customData) {
+            if (customDataKeySet.has(customData[id].key)) {  // check if key has already been used
+                snackbar.enqueueAlertFeedbackSnackbar("Custom data keys must be unique.");
+                return;
+            }
             if (customData[id].visibility === "public") {
                 customDataPublic[customData[id].key] = customData[id].value;
             } else {
                 customDataPrivate[customData[id].key] = customData[id].value;
             }
+            customDataKeySet.add(customData[id].key);
         }
 
         newTeamEditing.customDataPublic = customDataPublic;
@@ -293,7 +323,7 @@ function TeamEditPanel({teamEditing, setTeamEditing, isCreate, saveChanges, setU
                 }}></TextField>
             </Stack>
             
-            <Button variant="outlined" onClick={ updateTeamEditing }>Save Changes</Button>
+            <Button variant="outlined" onClick={ updateTeam }>Save Changes</Button>
             <Button>Delete Team</Button>
         </Stack>
     );

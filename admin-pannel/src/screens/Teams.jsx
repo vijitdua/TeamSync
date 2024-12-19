@@ -29,8 +29,6 @@ function Teams() {
     const snackbar = useGlobalSnackbar();
 
     useEffect(() => {
-        console.log("hi");
-        
         const getTeams = async () => {
             const teamData = await fetchTeams();
             for (let team of teamData) {
@@ -113,7 +111,7 @@ function Teams() {
 
     function saveChanges() {
         if (unsavedChanges) {
-            console.log("unsaved changes");
+            snackbar.enqueueAlertFeedbackSnackbar("Save or reset unsaved changes before exiting.");
         } else {
             const newTeamData = [...teamData];
             for (let i = 0; i < newTeamData.length; i++) {  // iterate through teamData
@@ -221,7 +219,7 @@ function Teams() {
                     width: "24rem",
                     height: "100vh",
                 }}>
-                    <TeamEditPanel teamEditing={teamEditing} setTeamEditing={setTeamEditing} saveChanges={saveChanges} setUnsavedChanges={setUnsavedChanges}></TeamEditPanel>
+                    <TeamEditPanel teamEditing={teamEditing} setTeamEditing={setTeamEditing} teamData={teamData} saveChanges={saveChanges} setUnsavedChanges={setUnsavedChanges}></TeamEditPanel>
             </Box> }
         </Box>
     );

@@ -1,14 +1,11 @@
 import { Box, Button, Checkbox, Grid2, TableCell, TableRow, TextField, Typography } from "@mui/material";
-import { useRef, useState } from "react";
+import { useState } from "react";
 
 
 function TeamRow({ team, onToggleSelect, isSelectMode, isCreationMode, onChangeName, onChangeLead, onCompleteTeam, setTeamEditing }) {
     const [isSelected, setIsSelected] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const [isCreating, setIsCreating] = useState(isCreationMode);
-
-    // 0 for none, 1 for name, 2 for teamLead
-    const focusField = useRef(1);
 
     function toggleSelect() {
         setIsSelected(!isSelected);

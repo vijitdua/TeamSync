@@ -143,12 +143,12 @@ function TeamEditPanel({teamEditing, isCreate, saveChanges}) {
                 </Grid2>
             </Grid2>
             <Stack spacing={0}>
-                <InputLabel htmlFor="team-name" sx={{ color: "black" }}>Name</InputLabel>
+                <InputLabel htmlFor="team-name" sx={{ color: "black" }} required>Name</InputLabel>
                 <TextField id="team-name" required value={teamName} onChange={(e) => setTeamName(e.target.value)}></TextField>
             </Stack>
 
             <Stack spacing={1}>
-                <InputLabel sx={{ color: "black" }}>Team Leads</InputLabel>
+                <InputLabel sx={{ color: "black" }} required>Team Leads</InputLabel>
                 <Stack spacing={1} id="team-leads">
                     { members.length? teamLead.map((currLead, idx) =>
                         <Select

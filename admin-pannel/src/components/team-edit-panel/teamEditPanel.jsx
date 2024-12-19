@@ -9,6 +9,7 @@ import AddIcon from '@mui/icons-material/Add';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import DeleteIcon from '@mui/icons-material/Delete';
+import CloseIcon from '@mui/icons-material/Close';
 import dayjs from "dayjs";
 import {v4 as uuidv4} from 'uuid';
 
@@ -180,7 +181,14 @@ function TeamEditPanel({teamEditing, setTeamEditing, isCreate, saveChanges, setU
                     <Typography variant="h3">{isCreate ? "Create Team" : "Edit Team"}</Typography>
                 </Grid2>
                 <Grid2>
-                    <Button variant="outlined" onClick={ updateTeamEditing }>Save Changes</Button>
+                    <Box component="button" sx={{
+                        border: "none",
+                        backgroundColor: "transparent",
+                        padding: "none",
+                        cursor: "pointer",
+                    }} onClick={ saveChanges }>
+                        <CloseIcon/>
+                    </Box>
                 </Grid2>
             </Grid2>
             <Stack spacing={0}>
@@ -284,7 +292,8 @@ function TeamEditPanel({teamEditing, setTeamEditing, isCreate, saveChanges, setU
                     setUnsavedChanges(true);
                 }}></TextField>
             </Stack>
-
+            
+            <Button variant="outlined" onClick={ updateTeamEditing }>Save Changes</Button>
             <Button>Delete Team</Button>
         </Stack>
     );

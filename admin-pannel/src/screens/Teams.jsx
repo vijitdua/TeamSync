@@ -41,10 +41,6 @@ function Teams() {
         getTeams();
     }, []);
 
-    useEffect(() => {
-        console.log("teamEditing changed");
-    }, [teamEditing])
-
     function toggleSelectTeam(teamID) {
         const newSelected = selectedTeams;
         if (newSelected.has(teamID)) {
@@ -101,14 +97,18 @@ function Teams() {
     }
 
     function saveChanges() {
-        const newTeamData = [...teamData];
-        for (let i = 0; i < newTeamData.length; i++) {  // iterate through teamData
-            if (newTeamData[i].id === teamEditing.id) {
-                newTeamData[i] = teamEditing;
+        if (unsavedChanges) {
+            console.log("unsaved changes");
+        } else {
+            const newTeamData = [...teamData];
+            for (let i = 0; i < newTeamData.length; i++) {  // iterate through teamData
+                if (newTeamData[i].id === teamEditing.id) {
+                    newTeamData[i] = teamEditing;
+                }
             }
+            setTeamData(newTeamData);
+            setTeamEditing(null);
         }
-        setTeamData(newTeamData);
-        setTeamEditing(null);
     }
 
     return (
@@ -197,11 +197,7 @@ function Teams() {
                     backgroundColor: "black",
                     opacity: "50%",
                 }} 
-                onClick={() => {
-                    if (!unsavedChanges) {
-                        saveChanges();
-                    }
-                }}
+                onClick={ saveChanges }
             />}
             { teamEditing !== null && <Box sx={{
                     position: "absolute",

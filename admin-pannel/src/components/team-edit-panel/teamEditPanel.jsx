@@ -54,7 +54,6 @@ function TeamEditPanel({teamEditing, setTeamEditing, teamData, isCreate, saveCha
      * get members list from backend for team lead drop-downs
      */
     useEffect(() => {
-        console.log(teamEditing);
         const getMembers = async () => {
             const memberIds = await fetchMemberIds();
             const newMembers = [];

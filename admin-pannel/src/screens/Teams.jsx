@@ -96,7 +96,6 @@ function Teams() {
     }
 
     async function completeNewTeam() {
-        console.log(newTeam);
         if (newTeam === null) {
             snackbar.enqueueAlertFeedbackSnackbar("Unknown error-- tried to complete new team when new team wasn't initialized");
             return false;
@@ -160,7 +159,6 @@ function Teams() {
             setIsSelectMode(true);
             setAllChecked(true);
         }
-        console.log(newSelected);
         setSelectedTeams(newSelected);
     }
 

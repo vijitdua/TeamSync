@@ -22,8 +22,12 @@ function TeamEditPanel({teamEditing, setTeamEditing, teamData, isCreate, saveCha
     const [teamLead, setTeamLead] = useState(teamEditing.teamLead);
     const [members, setMembers] = useState([]);
     const [foundationDate, setFoundationDate] = useState(isCreate? dayjs(new Date()) : dayjs(teamEditing.foundationDate));
-    const [description, setDescription] = useState(teamEditing.description !== null ? teamEditing.description : "");
-    const [notes, setNotes] = useState(teamEditing.notes);
+
+    const defaultDescriptionValue = (Object.hasOwn(teamEditing, "description") && teamEditing.description !== null) ? teamEditing.description : "";
+    const [description, setDescription] = useState(defaultDescriptionValue);
+
+    const defaultNotesValue = (Object.hasOwn(teamEditing, "notes") && teamEditing.notes !== null) ? teamEditing.notes : "";
+    const [notes, setNotes] = useState(defaultNotesValue);
 
     const snackbar = useGlobalSnackbar();
 
@@ -188,6 +192,19 @@ function TeamEditPanel({teamEditing, setTeamEditing, teamData, isCreate, saveCha
 
         setTeamEditing(newTeamEditing);
         setUnsavedChanges(false);
+        snackbar.enqueueSuccessFeedbackSnackbar("Changes saved.");
+    }
+
+    /**
+     * Reset any changes that have been done in the edit panel but not yet saved.
+     */
+    function resetChanges() {
+        setTeamName(teamEditing.name);
+        setTeamLead(teamEditing.teamLead);
+        setFoundationDate(dayjs(teamEditing.foundationDate));
+        setDescription(defaultDescriptionValue);
+        setNotes(defaultNotesValue);
+        snackbar.enqueueSuccessFeedbackSnackbar("Changes reset.");
     }
 
     return (
@@ -323,7 +340,8 @@ function TeamEditPanel({teamEditing, setTeamEditing, teamData, isCreate, saveCha
                 }}></TextField>
             </Stack>
             
-            <Button variant="outlined" onClick={ updateTeam }>Save Changes</Button>
+            <Button variant="contained" onClick={ updateTeam }>Save Changes</Button>
+            <Button variant="outlined" onClick={ resetChanges }>Reset Changes</Button>
             <Button>Delete Team</Button>
         </Stack>
     );

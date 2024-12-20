@@ -12,9 +12,7 @@ import { useGlobalSnackbar } from "../contexts/globalFeedbackSnackbarProvider";
 /**
  * TODO
  * - sync with backend (save data)
- * - snackbar for notifications and errors
  * - Team logo upload
- * - Prompt text for inputs
  * - Edit menu from add button
  */
 
@@ -25,6 +23,16 @@ function Teams() {
     const [newTeam, setNewTeam] = useState(null);
     const [teamEditing, setTeamEditing] = useState(null);
     const [unsavedChanges, setUnsavedChanges] = useState(false);
+
+    // TODO: id would be created by backend
+    const newTeamTemplate = {
+        name: "",
+        teamLead: [""],
+        foundationDate: new Date(),
+        description: "",
+        notes: "",
+        id: "NEW_TEAM"
+    }
 
     const snackbar = useGlobalSnackbar();
 
@@ -114,11 +122,19 @@ function Teams() {
             snackbar.enqueueAlertFeedbackSnackbar("Save or reset unsaved changes before exiting.");
         } else {
             const newTeamData = [...teamData];
+            let editedTeam = false;
             for (let i = 0; i < newTeamData.length; i++) {  // iterate through teamData
                 if (newTeamData[i].id === teamEditing.id) {
                     newTeamData[i] = teamEditing;
+                    editedTeam = true;
                 }
             }
+
+            // this is a new team
+            if (editedTeam === false) {
+                newTeamData.push(teamEditing);
+            }
+
             setTeamData(newTeamData);
             setTeamEditing(null);
         }
@@ -131,7 +147,7 @@ function Teams() {
                     <Grid2 container sx={{
                         justifyContent: "flex-end",
                     }}>
-                        <Button variant="contained" onClick={() => setTeamEditing({})}>
+                        <Button variant="contained" onClick={() => setTeamEditing(newTeamTemplate)}>
                             <Grid2 container spacing={1}>
                                 <AddIcon />
                                 <Typography>Add</Typography>

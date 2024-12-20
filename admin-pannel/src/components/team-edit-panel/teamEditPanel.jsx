@@ -205,6 +205,7 @@ function TeamEditPanel({teamEditing, setTeamEditing, teamData, isCreate, saveCha
         setDescription(defaultDescriptionValue);
         setNotes(defaultNotesValue);
         snackbar.enqueueSuccessFeedbackSnackbar("Changes reset.");
+        setUnsavedChanges(false);
     }
 
     return (

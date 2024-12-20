@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import TeamRow from "../components/team-row/teamRow";
 import MainLayout from "../layouts/MainLayout";
-import { Box, Button, Container, Grid2, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
+import { Box, Button, Checkbox, Container, Grid2, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
 import fetchTeams from "../services/fetchTeams";
 import fetchMember from "../services/fetchMember";
@@ -23,6 +23,9 @@ function Teams() {
     const [newTeam, setNewTeam] = useState(null);
     const [teamEditing, setTeamEditing] = useState(null);
     const [unsavedChanges, setUnsavedChanges] = useState(false);
+    const [checkIsHovered, setCheckIsHovered] = useState(false);
+
+    const [allChecked, setAllChecked] = useState(false);
 
     // TODO: id would be created by backend
     const newTeamTemplate = {
@@ -53,15 +56,19 @@ function Teams() {
     }, []);
 
     function toggleSelectTeam(teamID) {
-        const newSelected = selectedTeams;
+        const newSelected = new Set(selectedTeams);
         if (newSelected.has(teamID)) {
-            if (selectedTeams.size === 1) {
+            if (newSelected.size === 1) {
                 setIsSelectMode(false);
             }
             newSelected.delete(teamID);
+            setAllChecked(false);
         } else {
             setIsSelectMode(true);
             newSelected.add(teamID);
+            if (newSelected.length === teamData.length) {
+                setAllChecked(true);
+            }
         }
         setSelectedTeams(newSelected);
     }
@@ -140,6 +147,23 @@ function Teams() {
         }
     }
 
+    function toggleSelectAll() {
+        const newSelected = new Set(selectedTeams);
+        if (allChecked) {
+            newSelected.clear();
+            setIsSelectMode(false);
+            setAllChecked(false);
+        } else {
+            for (let i = 0; i < teamData.length; i ++) {
+                newSelected.add(teamData[i].id);
+            }
+            setIsSelectMode(true);
+            setAllChecked(true);
+        }
+        console.log(newSelected);
+        setSelectedTeams(newSelected);
+    }
+
     return (
         <Box>
             <MainLayout teamEditing={teamEditing}>
@@ -160,8 +184,26 @@ function Teams() {
                                 "& th": {
                                     borderBottom: "1px solid #a9b8ec",
                                 },
+                                padding: "0",
                             }}>
-                                <TableCell/>
+                                {/* Checkbox */}
+                                <TableCell sx={{
+                                    padding: "none",
+                                }}>
+                                    <Checkbox sx={{
+                                            opacity: (checkIsHovered || isSelectMode)? "1" : "0",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                        }} onChange={ toggleSelectAll }
+                                        checked={allChecked}
+                                        onMouseOver={() => {
+                                            setCheckIsHovered(true);
+                                        }}
+                                        onMouseOut={() => {
+                                            setCheckIsHovered(false);
+                                        }}
+                                    ></Checkbox>
+                                </TableCell>
                                 <TableCell colSpan={2}><Typography variant="h3">Team</Typography></TableCell>
                                 <TableCell><Typography variant="h3">Team Lead</Typography></TableCell>
                                 <TableCell><Typography variant="h3">Discord Role</Typography></TableCell>
@@ -172,6 +214,7 @@ function Teams() {
                                 return (
                                     <TeamRow key={idx}
                                         team={team}
+                                        selectedTeams={selectedTeams}
                                         isSelectMode={isSelectMode}
                                         isCreationMode={newTeam !== null}
                                         onToggleSelect={() => toggleSelectTeam(team.id)}

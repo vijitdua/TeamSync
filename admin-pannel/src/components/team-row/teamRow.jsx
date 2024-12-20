@@ -2,15 +2,11 @@ import { Box, Button, Checkbox, Grid2, TableCell, TableRow, TextField, Typograph
 import { useState } from "react";
 
 
-function TeamRow({ team, onToggleSelect, isSelectMode, isCreationMode, onChangeName, onChangeLead, onCompleteTeam, setTeamEditing }) {
-    const [isSelected, setIsSelected] = useState(false);
+function TeamRow({ team, selectedTeams, onToggleSelect, isSelectMode, isCreationMode, onChangeName, onChangeLead, onCompleteTeam, setTeamEditing }) {
     const [isHovered, setIsHovered] = useState(false);
     const [isCreating, setIsCreating] = useState(isCreationMode);
 
-    function toggleSelect() {
-        setIsSelected(!isSelected);
-        onToggleSelect();
-    }
+    const isSelected = selectedTeams.has(team.id);
 
     async function attemptCompleteTeam() {
         const response = await onCompleteTeam();
@@ -39,9 +35,9 @@ function TeamRow({ team, onToggleSelect, isSelectMode, isCreationMode, onChangeN
             <TableCell align="center" sx={{
                 width: "4rem",
             }}>
-                <Checkbox onChange={ toggleSelect } id={`checkbox-${team.id}`} sx={{
-                    display: (isHovered || isSelectMode)? "inline" : "none",
-                }}></Checkbox>
+                <Checkbox onChange={ onToggleSelect } id={`checkbox-${team.id}`} sx={{
+                    display: (isHovered || isSelectMode)? "block" : "none",
+                }} checked={ isSelected }></Checkbox>
             </TableCell>
 
             {/* Logo */}

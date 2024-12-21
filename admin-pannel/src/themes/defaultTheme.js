@@ -1,4 +1,4 @@
-// primaryTheme.js
+// defaultTheme.js
 // Manages the primary theme for the entire app
 
 import { createTheme, responsiveFontSizes } from "@mui/material";
@@ -9,7 +9,10 @@ import '@fontsource/inter/500.css';
 import '@fontsource/inter/600.css';
 import '@fontsource/inter/700.css';
 
-// TODO: THIS IS JUST THE EXAMPLE COPIED FROM ANOTHER ONE OF OUR PROJECTS, CHANGE THIS THO, THIS THEME IS SHIT I ONLY COPIED IT FOR THE SYNTAX
+// todo: actually decide on a theme lol this is just random shit
+const primaryColor = '#5d5aff';  // discord icon-like shade lmao
+const primaryLight = '#827fff';
+const primaryDark = '#3632d1';
 
 let theme = createTheme({
     breakpoints: {
@@ -24,90 +27,65 @@ let theme = createTheme({
 
     palette: {
         primary: {
-            main: '#ff5aa7', // From --title-gradient start
-            light: '#f7a059', // From --title-gradient end
-            dark: '#ff5aa7',
+            main: primaryColor, 
+            light: primaryLight, 
+            dark: primaryDark,
             contrastText: '#ffffff',
         },
         secondary: {
-            main: '#4cb6fd', // From --team-header-gradient start
-            light: '#4bff93', // From --team-header-gradient end
+            main: '#4cb6fd', // leftover from icarus alpha website
+            light: '#4bff93', 
             dark: '#4cb6fd',
-            contrastText: '#ffffff',
+            contrastText: '#000000',
         },
         background: {
-            default: '#101010', // From body background gradient start
-            paper: '#232323', // From body background gradient end
+            default: '#ccd6f8', // light purplish blue idk??
+            paper: '#FFFFFF', // white
         },
         text: {
-            primary: '#ffffff', // From --text-color
-            secondary: '#88cded', // From --p-color
+            primary: '#000000', // white
+            // secondary: '#000000', // idk
         },
-
-        appBar: {
-            background: 'linear-gradient(to right, #ff5aa7, #f7a059)',
-        },
-
-        mobileAppBarBurgerMenu: {
-            background: '#1f1f1f',
-            listBackground: '#2b2b2b',
-            iconColor: '#fff',
-        }
     },
     typography: {
         fontFamily: 'Arial, sans-serif',
         h1: {
             fontFamily: 'Inter, Arial, sans-serif',
             fontWeight: 700,
-            fontSize: '2.95rem',
-            background: 'linear-gradient(to right, #ff5aa7, #f7a059)',
-            WebkitBackgroundClip: 'text',
-            backgroundClip: 'text',
-            color: 'transparent',
+            fontSize: '2.125rem',
         },
         h2: {
             fontFamily: 'Inter, Arial, sans-serif',
             fontWeight: 600,
-            fontSize: '2.45rem',
-            background: 'linear-gradient(to right, #4cb6fd, #4bff93)',
-            WebkitBackgroundClip: 'text',
-            backgroundClip: 'text',
-            color: 'transparent',
+            fontSize: '1.875rem',
         },
         h3: {
             fontFamily: 'Inter, Arial, sans-serif',
             fontWeight: 500,
-            fontSize: '1.75rem',
-            background: 'linear-gradient(to right, #38f4d8, #2ebac6)',
-            WebkitBackgroundClip: 'text',
-            backgroundClip: 'text',
-            color: 'transparent',
+            fontSize: '1.5rem',
         },
         h4: {
             fontFamily: 'Inter, Arial, sans-serif',
-            color: '#38f4d8',
-            fontWeight: 400,
-            fontSize: '1.75rem',
-        },
-        h5: {
-            fontFamily: 'Inter, Arial, sans-serif',
-            color: '#2ebac6',
-            fontWeight: 400,
-            fontSize: '1.5rem',
-        },
-        h6: {
-            fontFamily: 'Inter, Arial, sans-serif',
-            color: '#2ebac6',
             fontWeight: 400,
             fontSize: '1.25rem',
         },
+        h5: {
+            fontFamily: 'Inter, Arial, sans-serif',
+            fontWeight: 400,
+            fontSize: '1.125rem',
+        },
+        h6: {
+            fontFamily: 'Inter, Arial, sans-serif',
+            fontWeight: 400,
+            fontSize: '1rem',
+        },
         body1: {
             fontFamily: 'Arial, sans-serif',
-            fontSize: '1.12rem',
+            fontSize: '1rem',
         },
         body2: {
             fontFamily: 'Arial, sans-serif',
-            fontSize: '1.12rem',
+            fontSize: '1rem',
         },
     },
     components: {
@@ -122,20 +100,31 @@ let theme = createTheme({
                     marginRight: '11px',
                     transition: 'transform 0.3s ease',
                 },
-                containedPrimary: {
-                    background: 'linear-gradient(to right, #ff5aa7, #f7a059)',
-                    backgroundSize: '500% 500%',
-                    animation: 'movingGradient 15s linear infinite alternate',
-                },
-                containedSecondary: {
-                    background: 'linear-gradient(to right, #ff9a76, #ffcd56)',
-                },
-                link: { // a button styled to look like a link
-                    '&:hover': {
-                        backgroundColor: "transparent",
-                    },
-                    padding: 0,
-                    color: "#2ebac6",
+            },
+        },
+        MuiStack: {
+            styleOverrides: {
+                root: {
+                    variants: [
+                        {
+                            props: { variant: "sidebar" },
+                            style: {
+                                backgroundColor: primaryDark,
+                                color: "#ffffff",
+                                padding: "1rem",
+                            },
+                        },
+                        {
+                            props: { variant: "content-wrapper" },
+                            style: {
+                                width: "100%",
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                            },
+                        },
+                    ],
+                    
                 }
             },
         },

@@ -30,7 +30,7 @@ function Teams() {
     // TODO: id would be created by backend
     const newTeamTemplate = {
         name: "",
-        teamLead: [""],
+        teamLead: [{id: ""}],
         foundationDate: new Date(),
         description: "",
         notes: "",

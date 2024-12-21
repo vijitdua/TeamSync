@@ -17,7 +17,9 @@ import { useGlobalSnackbar } from "../../contexts/globalFeedbackSnackbarProvider
 /**
  * pop-up at right side of screen when editing a team in team view
  */
-function TeamEditPanel({teamEditing, setTeamEditing, teamData, isCreate, saveChanges, setUnsavedChanges}) {
+function TeamEditPanel({teamEditing, setTeamEditing, teamData, saveChanges, setUnsavedChanges}) {
+    const isCreate = teamEditing.id === "NEW_TEAM";
+
     const [teamName, setTeamName] = useState(teamEditing.name);
     const [teamLead, setTeamLead] = useState(teamEditing.teamLead);
     const [members, setMembers] = useState([]);
@@ -66,7 +68,11 @@ function TeamEditPanel({teamEditing, setTeamEditing, teamData, isCreate, saveCha
         getMembers();
     }, []);
 
-    
+    useEffect(() => {
+        if (isCreate) {
+            setUnsavedChanges(true);
+        }
+    }, [isCreate, setUnsavedChanges]);
 
     /**
      * TODO: error checking...
@@ -155,6 +161,12 @@ function TeamEditPanel({teamEditing, setTeamEditing, teamData, isCreate, saveCha
         const newTeamEditing = {...teamEditing};
         newTeamEditing.name = teamName;
 
+        // check if team name is empty
+        if (teamName.length === 0) {
+            snackbar.enqueueAlertFeedbackSnackbar("Team name cannot be empty.");
+            return;
+        }
+
         // check if team name has already been used
         for (let i = 0; i < teamData.length; i ++) {
             if (teamData[i].name === teamName && teamData[i].id !== newTeamEditing.id) {
@@ -164,6 +176,13 @@ function TeamEditPanel({teamEditing, setTeamEditing, teamData, isCreate, saveCha
         }
 
         newTeamEditing.foundationDate = foundationDate.toDate();  // convert to JavaScript date
+
+        for (let i = 0; i < teamLead.length; i ++) {
+            if (Object.keys(teamLead[i]).length === 0) {
+                snackbar.enqueueAlertFeedbackSnackbar("Team lead selection cannot be empty.");
+                return;
+            }
+        }
         newTeamEditing.teamLead = teamLead;
 
         const customDataKeySet = new Set([]);
@@ -205,7 +224,26 @@ function TeamEditPanel({teamEditing, setTeamEditing, teamData, isCreate, saveCha
         setDescription(defaultDescriptionValue);
         setNotes(defaultNotesValue);
         snackbar.enqueueSuccessFeedbackSnackbar("Changes reset.");
-        setUnsavedChanges(false);
+        setUnsavedChanges(true);
+    }
+
+    /**
+     * Delete a lead from the list of leads given the index in the teamLead array.
+     */
+    function deleteLeadEntry(idx) {
+        const newTeamLead = teamLead.toSpliced(idx, 1);
+        setTeamLead(newTeamLead);
+        setUnsavedChanges(true);
+    }
+
+    /**
+     * Add a new lead to the team lead array that is empty.
+     */
+    function addLeadEntry() {
+        const newTeamLead = [...teamLead];
+        newTeamLead.push({});
+        setTeamLead(newTeamLead);
+        setUnsavedChanges(true);
     }
 
     return (
@@ -251,22 +289,46 @@ function TeamEditPanel({teamEditing, setTeamEditing, teamData, isCreate, saveCha
                 <InputLabel sx={{ color: "black" }} required>Team Leads</InputLabel>
                 <Stack spacing={1} id="team-leads">
                     { members.length? teamLead.map((currLead, idx) =>
-                        <Select
-                            value={currLead.id}
-                            className="dropdown"
-                            onChange={(e) => changeTeamLead(idx, e.target.value)}
-                            key={idx}
-                        >
-                            { members.map((member) =>
-                                <MenuItem key={member.id} value={member.id}>
-                                    {member.name}
-                                </MenuItem>
-                            ) }
-                        </Select>
+                        <Grid2 container key={idx} spacing={1}>
+                            <Grid2 sx={{
+                                flex: "1",
+                                display: "flex",
+                            }}>
+                                <Select
+                                    value={currLead.id}
+                                    className="dropdown"
+                                    onChange={(e) => changeTeamLead(idx, e.target.value)}
+                                    sx={{
+                                        flex: "1",
+                                    }}
+                                >
+                                    { members.map((member) =>
+                                        <MenuItem key={member.id} value={member.id}>
+                                            {member.name}
+                                        </MenuItem>
+                                    ) }
+                                </Select>
+                            </Grid2>
+                            <Grid2>
+                                <Box component="button" sx={{
+                                    backgroundColor: "transparent",
+                                    border: "none",
+                                    cursor: "pointer",
+                                }} onClick={() => {
+                                    deleteLeadEntry(idx);
+                                }}>
+                                    <DeleteIcon/>
+                                </Box>
+                            </Grid2>
+                        </Grid2>
                     )
                     :
                     <Typography>Loading...</Typography> }
                 </Stack>
+                <Button variant="outlined" onClick={ addLeadEntry }>
+                    <AddIcon />
+                    Add Team Lead
+                </Button>
             </Stack>
 
             <Stack spacing={1}>

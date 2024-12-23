@@ -17,7 +17,7 @@ import { useGlobalSnackbar } from "../../contexts/globalFeedbackSnackbarProvider
 /**
  * pop-up at right side of screen when editing a team in team view
  */
-function TeamEditPanel({teamEditing, setTeamEditing, teamData, saveChanges, setUnsavedChanges}) {
+function TeamEditPanel({teamEditing, setTeamEditing, teamData, saveChanges, unsavedChanges, setUnsavedChanges}) {
     const isCreate = teamEditing.id === "NEW_TEAM";
 
     const [teamName, setTeamName] = useState(teamEditing.name);
@@ -266,6 +266,14 @@ function TeamEditPanel({teamEditing, setTeamEditing, teamData, saveChanges, setU
                 <Grid2>
                     <Typography variant="h3">{isCreate ? "Create Team" : "Edit Team"}</Typography>
                 </Grid2>
+                { unsavedChanges && <Grid2>
+                    <Typography sx={{
+                        color: "darkred",
+                        border: "1px solid darkred",
+                        padding: "0.15rem 0.5rem",
+                        borderRadius: "4px",
+                    }}>Unsaved Changes</Typography>
+                </Grid2>}
                 <Grid2>
                     <Box component="button" sx={{
                         border: "none",

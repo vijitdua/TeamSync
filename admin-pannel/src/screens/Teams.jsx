@@ -13,7 +13,6 @@ import { useGlobalSnackbar } from "../contexts/globalFeedbackSnackbarProvider";
  * TODO
  * - sync with backend (save data)
  * - Team logo upload
- * - Edit menu from add button
  */
 
 function Teams() {
@@ -276,7 +275,7 @@ function Teams() {
                     width: "24rem",
                     height: "100vh",
                 }}>
-                    <TeamEditPanel teamEditing={teamEditing} setTeamEditing={setTeamEditing} teamData={teamData} saveChanges={saveChanges} setUnsavedChanges={setUnsavedChanges}></TeamEditPanel>
+                    <TeamEditPanel teamEditing={teamEditing} setTeamEditing={setTeamEditing} teamData={teamData} saveChanges={saveChanges} unsavedChanges={unsavedChanges} setUnsavedChanges={setUnsavedChanges}></TeamEditPanel>
             </Box> }
         </Box>
     );

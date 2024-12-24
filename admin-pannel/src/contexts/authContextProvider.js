@@ -3,6 +3,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import LoadingPage from "../screens/LoadingPage";
+import checkAuth from '../services/checkAuth';
 
 const AuthContextProvider = createContext();
 
@@ -25,10 +26,14 @@ export function AuthProvider({ children }) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // todo: check for cookie and force login if needed
+        const tryAuth = async () => {
+            const successfulAuth = await checkAuth();
+            setIsLoggedIn(successfulAuth); 
+            setLoading(false);
+        }
+
+        tryAuth();
         
-        setIsLoggedIn(true);  // change manually for development
-        setLoading(false);
     }, []);
 
     const value = {isLoggedIn};

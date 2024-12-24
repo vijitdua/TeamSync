@@ -17,7 +17,7 @@ import { useGlobalSnackbar } from "../../contexts/globalFeedbackSnackbarProvider
 /**
  * pop-up at right side of screen when editing a team in team view
  */
-function TeamEditPanel({teamEditing, setTeamEditing, teamData, saveChanges, unsavedChanges, setUnsavedChanges}) {
+function TeamEditPanel({teamEditing, setTeamEditing, teamData, saveChanges, exitEdit, unsavedChanges, setUnsavedChanges}) {
     const isCreate = teamEditing.id === "NEW_TEAM";
 
     const [teamName, setTeamName] = useState(teamEditing.name);
@@ -177,8 +177,12 @@ function TeamEditPanel({teamEditing, setTeamEditing, teamData, saveChanges, unsa
 
         newTeamEditing.foundationDate = foundationDate.toDate();  // convert to JavaScript date
 
+        if (teamLead.length === 0) {
+            snackbar.enqueueAlertFeedbackSnackbar("Team lead selection cannot be empty.");
+            return;
+        }
         for (let i = 0; i < teamLead.length; i ++) {
-            if (Object.keys(teamLead[i]).length === 0) {
+            if (Object.keys(teamLead[i]).length < 2) {
                 snackbar.enqueueAlertFeedbackSnackbar("Team lead selection cannot be empty.");
                 return;
             }
@@ -280,7 +284,11 @@ function TeamEditPanel({teamEditing, setTeamEditing, teamData, saveChanges, unsa
                         backgroundColor: "transparent",
                         padding: "none",
                         cursor: "pointer",
-                    }} onClick={ saveChanges }>
+                    }} onClick={ () => {
+                        if (saveChanges()) {
+                            exitEdit();
+                        }
+                    } }>
                         <CloseIcon/>
                     </Box>
                 </Grid2>

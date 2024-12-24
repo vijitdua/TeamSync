@@ -10,7 +10,6 @@ function AuthRedirectWrapper({children}){
     // Redirects to login page if the user is not authenticated.
     useEffect(() => {
         if (!isLoggedIn) {
-            console.log("User is not logged in");
             console.log("Navigating to login page")
             navigate(routes.login);
         }

@@ -4,6 +4,8 @@ import { useState } from "react";
 import { auth } from "../services/auth";
 import { routes } from "../config/routesConfig";
 import { useNavigate } from "react-router-dom";
+import checkAuth from "../services/checkAuth";
+import checkCookie from "../services/checkCookie";
 
 // todo: improve this layout it's really meh
 function Login() {
@@ -14,11 +16,18 @@ function Login() {
     // call auth function to attempt login
     // successful login sends cookie back for future requests
     // todo: add check to see if successful login, if so, redirect
-    function handleSubmit(username, password) {
+    async function handleSubmit(username, password) {
         auth(username, password)
-            .then((isLoggedIn) => {
-                if (isLoggedIn) {
-                    navigate(routes.home);
+            .then(async (result) => {
+                // why does check auth here always return 401 even though login successful?
+                console.log("result of login", result);
+                console.log("auth check:", await checkAuth());
+                console.log("cookie check:", await checkCookie());
+                if (result) {
+                    // uncomment this after auth issue is resolved
+                    // currently, after navigating to home, we always get forced back out
+                    // because auth check fails.
+                    // navigate(routes.home);
                 }
             })
             .catch((error) => {

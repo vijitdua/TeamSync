@@ -8,6 +8,8 @@ import fetchMember from "../services/fetchMember";
 import getMemberIdFromName from "../services/getMemberIdFromName";
 import TeamEditPanel from "../components/team-edit-panel/teamEditPanel";
 import { useGlobalSnackbar } from "../contexts/globalFeedbackSnackbarProvider";
+import createTeam from "../services/createTeam";
+import checkAuth from "../services/checkAuth";
 
 /**
  * TODO
@@ -118,31 +120,52 @@ function Teams() {
         newTeams[newTeams.length - 1] = nextTeam;
         setTeamData(newTeams);
         setNewTeam(null);
-        snackbar.enqueueSuccessFeedbackSnackbar("Successfully created team.", 3000);
+
+        const authCheck = await checkAuth();
+        console.log("auth check", authCheck);
+        console.log({name: newTeam.name, teamLead: newTeam.teamLead.map((lead) => lead.id)});
+        await createTeam({name: newTeam.name, teamLead: newTeam.teamLead.map((lead) => lead.id)});
+        snackbar.enqueueSuccessFeedbackSnackbar("Successfully created team.");
         return true;
+    }
+
+    function exitEdit() {
+        setTeamEditing(null);
     }
 
     function saveChanges() {
         if (unsavedChanges) {
             snackbar.enqueueAlertFeedbackSnackbar("Save or reset unsaved changes before exiting.");
-        } else {
-            const newTeamData = [...teamData];
-            let editedTeam = false;
-            for (let i = 0; i < newTeamData.length; i++) {  // iterate through teamData
-                if (newTeamData[i].id === teamEditing.id) {
-                    newTeamData[i] = teamEditing;
-                    editedTeam = true;
-                }
-            }
-
-            // this is a new team
-            if (editedTeam === false) {
-                newTeamData.push(teamEditing);
-            }
-
-            setTeamData(newTeamData);
-            setTeamEditing(null);
+            return false;
         }
+        const newTeamData = [...teamData];
+        let editedTeam = false;
+        for (let i = 0; i < newTeamData.length; i++) {  // iterate through teamData
+            if (newTeamData[i].id === teamEditing.id) {
+                newTeamData[i] = teamEditing;
+                editedTeam = true;
+            }
+        }
+
+        const teamForSync = {...teamEditing};
+        for (let i = 0; i < teamForSync.teamLead.length; i ++) {  // iterate through team leads
+            // map team lead member object into member ID
+            teamForSync.teamLead[i] = teamForSync.teamLead[i].id;
+        }
+        delete teamForSync.id;
+        delete teamForSync.foundationDate;
+        delete teamForSync.updatedAt;
+
+        console.log(teamForSync);
+
+        // this is a new team
+        if (editedTeam === false) {
+            newTeamData.push(teamForSync);
+            createTeam(teamForSync);
+        }
+
+        setTeamData(newTeamData);
+        return true;
     }
 
     function toggleSelectAll() {
@@ -266,7 +289,11 @@ function Teams() {
                     backgroundColor: "black",
                     opacity: "50%",
                 }} 
-                onClick={ saveChanges }
+                onClick={ () => {
+                    if (saveChanges()) {
+                        exitEdit();
+                    }
+                }}
             />}
             { teamEditing !== null && <Box sx={{
                     position: "absolute",
@@ -275,7 +302,15 @@ function Teams() {
                     width: "24rem",
                     height: "100vh",
                 }}>
-                    <TeamEditPanel teamEditing={teamEditing} setTeamEditing={setTeamEditing} teamData={teamData} saveChanges={saveChanges} unsavedChanges={unsavedChanges} setUnsavedChanges={setUnsavedChanges}></TeamEditPanel>
+                    <TeamEditPanel 
+                        teamEditing={teamEditing} 
+                        setTeamEditing={setTeamEditing} 
+                        teamData={teamData} 
+                        saveChanges={saveChanges} 
+                        exitEdit={exitEdit} 
+                        unsavedChanges={unsavedChanges} 
+                        setUnsavedChanges={setUnsavedChanges}
+                    ></TeamEditPanel>
             </Box> }
         </Box>
     );

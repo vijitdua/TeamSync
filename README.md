@@ -1,5 +1,4 @@
 **TeamSync | Administrative Task Management for Teams**  
-**In Progress**
+**Abandoned Project**
 
-- Aims to streamline administrative tasks for team and member management, particularly for companies using Discord.
-- Provides functionality to make specific data public, allowing companies and project details to be displayed without additional setup through simple GET calls for web integration.
+-> This project has been abandoned and is partially complete. The backend is functional and so is the discord functionality, the frontend remains incomplete. Beyond API documentation inside the backend directory, the rest of the project remains undocumented. This repository is, however, open to pull requests from the community.

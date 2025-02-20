@@ -3,4 +3,8 @@ export const routes = {
     signup: '/signup',
 
     home: '/',
+    members: '/members',
+    teams: '/teams',
+    deletedMembers: '/deleted-members',
+    deletedTeams: '/deleted-teams',
 }

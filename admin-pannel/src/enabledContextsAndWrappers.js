@@ -3,19 +3,22 @@ import AuthRedirectWrapper from "./wrappers/AuthRedirectWrapper";
 import {AuthProvider} from "./contexts/authContextProvider";
 import {DialogProvider} from "./contexts/dialogProvider";
 import {GlobalFeedbackSnackbarProvider} from "./contexts/globalFeedbackSnackbarProvider";
+import { BrowserRouter } from "react-router-dom";
 
 function enabledContextsAndWrappers({children}) {
     return (
         <>
             <ThemeWrapper>
                 <AuthProvider>
-                    <AuthRedirectWrapper>
-                        <GlobalFeedbackSnackbarProvider>
-                            <DialogProvider>
-                                {children}
-                            </DialogProvider>
-                        </GlobalFeedbackSnackbarProvider>
-                    </AuthRedirectWrapper>
+                    <BrowserRouter>
+                        <AuthRedirectWrapper>
+                            <GlobalFeedbackSnackbarProvider>
+                                <DialogProvider>
+                                    {children}
+                                </DialogProvider>
+                            </GlobalFeedbackSnackbarProvider>
+                        </AuthRedirectWrapper>
+                    </BrowserRouter>
                 </AuthProvider>
             </ThemeWrapper>
         </>

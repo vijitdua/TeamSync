@@ -3,6 +3,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import LoadingPage from "../screens/LoadingPage";
+import checkAuth from '../services/checkAuth';
 
 const AuthContextProvider = createContext();
 
@@ -25,7 +26,14 @@ export function AuthProvider({ children }) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // TODO: ADD A CODE HERE THAT FETCHES SESSION COOKIE, CHECK IF IT EXISTS. AND THEN CHANGED LOGGED IN TO REPRESENT IF AUTHENTICATED OR NOT. AND THEN MODIFY LOADING TO FALSE WHEN FINISHED
+        const tryAuth = async () => {
+            const successfulAuth = await checkAuth();
+            setIsLoggedIn(successfulAuth); 
+            setLoading(false);
+        }
+
+        tryAuth();
+        
     }, []);
 
     const value = {isLoggedIn};
